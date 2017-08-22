@@ -70,27 +70,6 @@ function returnEventObj( eventObj ) {
       return newEventObj
 }
 
-/**
- * Evaluets the node Obj that was passed and attaching that props and data to the node
- * @param {string} propName
- * @param {nodeObject} node
- * @param {nodeObj} object
- */
-function evalNodeObj( propName, node, nodeObj ) {
-      switch ( propName ) {
-          case 'text':
-              // add the node context as a node text
-              nodeContext = this.document.createTextNode(nodeObj[propName]);
-              // apppend that context to the 'newNode'
-              node.appendChild(nodeContext);
-
-              break
-          case 'attributes':
-              this.setAttributes(node, nodeObj.attributes)
-
-              break
-      }
-}
 
 /**
  * @function
@@ -117,6 +96,28 @@ function ginger( appId ) {
 
     // checks if the appDOM exist on the DOM
     if ( this.appDOM !== null ) {
+
+          /**
+           * Evaluets the node Obj that was passed and attaching that props and data to the node
+           * @param {string} propName
+           * @param {nodeObject} node
+           * @param {nodeObj} object
+           */
+          function evalNodeObj( propName, node, nodeObj ) {
+                switch ( propName ) {
+                    case 'text':
+                        // add the node context as a node text
+                        nodeContext = this.document.createTextNode(nodeObj[propName]);
+                        // apppend that context to the 'newNode'
+                        node.appendChild(nodeContext);
+
+                        break
+                    case 'attributes':
+                        new ginger(appId).setAttributes(node, nodeObj.attributes)
+
+                        break
+                }
+          }
 
         /**
          * This is assigns the {context} to the title element of the webpages {DOM}
@@ -202,7 +203,7 @@ function ginger( appId ) {
                     nodeObj = context
                     for (let e in nodeObj) {
                         if ( nodeObj[e] !== undefined ) {
-                            evalNodeObj(e, node, nodeObj)
+                            evalNodeObj(e, newNode, nodeObj)
                         }
                     }
                 }
@@ -263,12 +264,14 @@ function ginger( appId ) {
          */
         this.appendToDOM = function( el, context ) {
             if ( Array.isArray( el ) || Array.isArray( context ) ) {
+                // is the context is a array/nodeArray then use that as the nodes or the el that is array/nodeArray
                 Array.prototype.forEach.call(Array.isArray( context ) ? context : el, i => {
-                    this.appendToDOM(i)
+                    // if 'el' is a nodeObject then append to that node to the appDOM else append to the appDOM
+                    return typeof el === 'object' ? el.appendChild(i) : this.appendToDOM(i)
                 })
             } else if ( ( el !== undefined && typeof el === 'object' ) && context === undefined ) {
                   return this.appDOM.appendChild(el)
-            } else if ( ( el !== undefined && typeof el === 'object' ) && context !== undefined ) {
+            } else if ( typeof el === 'object' && context !== undefined ) {
                 return this.appendToDOM(el.appendChild(context))
             } else {
                   let parentNode, nodeName;
@@ -289,17 +292,21 @@ function ginger( appId ) {
                   } else {
                       var nodeQuerys = el === 'body' || el === appId ? [this.appDOM] : this.appDOM.querySelectorAll(el)
 
-                      if ( nodeQuerys.length !== 0 ) {
-                          if ( ![ 'div', 'span', 'ul', 'header', 'article' ].includes(el) ) {
-                              return this.appDOM.appendChild(this.createElement(el, context))
-                          }
-                          Array.prototype.forEach.call(nodeQuerys, node => {
-                              if ( typeof context !== 'object' ) {
-                                  return node.appendChild(this.document.createTextNode(context))
+                      if ( typeof el === 'string' && context !== undefined ) {
+                          if ( nodeQuerys.length !== 0 ) {
+                              if ( ![ 'div', 'span', 'ul', 'header', 'article' ].includes(el) ) {
+                                  return this.appDOM.appendChild(this.createElement(el, context))
                               }
-                          })
-                      } else {
-                          throw new Error(`ginger.js: ${ el } is a undefined element on your your appDOM.`)
+                              Array.prototype.forEach.call(nodeQuerys, node => {
+                                  if ( typeof context !== 'object' ) {
+                                      return node.appendChild(this.document.createTextNode(context))
+                                  } else {
+                                      return node.appendChild( context )
+                                  }
+                              })
+                          } else {
+                              throw new Error(`ginger.js: ${ el } is a undefined element on your your appDOM.`)
+                          }
                       }
                   }
             }

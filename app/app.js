@@ -2,7 +2,11 @@ const app = new ginger('#app')
 
 
 // creates a div node => <div></div>
-var div = app.createElement('div')
+var div = app.createElement('div', {
+    attributes: {
+        id: 'sandbox'
+    }
+})
 
 // appends to the elements DOM
 /*
@@ -21,7 +25,6 @@ app.appendToDOM(div)
     ]
 */
 var items = ['sleep', 'eat', 'code' ]
-
 var nodeArray = items.map((item, i) => {
     return app.createElement('p', item, {
         attributes: {
@@ -32,6 +35,20 @@ var nodeArray = items.map((item, i) => {
 
 // appends this nodeArray to the div on the appDOM
 app.appendToDOM(div, nodeArray)
+
+
+app.appendToDOM('div',
+    app.createElement('p', {
+        attributes: {
+            id: 'i'
+        },
+        text: 'hello, world'
+    })
+)
+// or
+// var items = ['sleep', 'eat', 'code' ]
+// items.forEach((item, i) => {
+// })
 
 
 
