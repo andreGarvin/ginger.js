@@ -41,7 +41,10 @@
  * @returns {eventObj}
  */
 function returnEventObj( eventObj ) {
-      console.log( eventObj.type )
+      if ( eventObj.type === 'keydown' || eventObj.type === 'keyup' ) {
+          eventObj.type = 'keypress';
+      }
+      
       // creatign default event props in 'newEventObj'
       let newEventObj = {
           altKey: eventObj.altKey,
