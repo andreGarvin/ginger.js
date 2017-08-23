@@ -1,17 +1,16 @@
-const app = new ginger()
+const app = new idk()
 
+app.title('idk.js')
 var todoItems = [
     'eat',
     'sleep',
     'code'
 ]
 
-app.insertText('#itemsCount', todoItems.length)
-
 function addNewItem( input ) {
     if ( input.length > 0 ) {
         todoItems.push( input )
-        // showTodoItems()
+        showTodoItems()
     }
 }
 
@@ -24,14 +23,15 @@ function showTodoItems() {
             }
         })
     })
+    app.insertText('#itemsCount', todoItems.length)
     app.insertToDOM('#TODOitem', nodeArray)
 }
 showTodoItems()
 
 app.onKeyPressDown('input', e => {
-    console.log( e.key, app.val('input') )
     if ( e.key === 'Enter' ) {
         addNewItem( app.val('input') )
+        app.val('input', '')
     }
 })
 
@@ -103,13 +103,13 @@ app.appendToDOM('div',
 
 
 // this is changing the title of the browser tab window
-app.title('ginger.js')
+app.title('idk.js')
 
 // this is inserting text into a HTML element
 app.insertText('h1#one', 'Hello, World!')
 
 // this has a time out and inserts something into a html element
-setTimeout(() => app.insertText('h1', 'This is a ginger.js!'), 3000)
+setTimeout(() => app.insertText('h1', 'This is a idk.js!'), 3000)
 
 // click handler
 app.click('button', e => {
