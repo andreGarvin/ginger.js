@@ -1,6 +1,56 @@
-const app = new ginger('#app')
+const app = new ginger()
 
+var todoItems = [
+    'eat',
+    'sleep',
+    'code'
+]
 
+app.insertText('#itemsCount', todoItems.length)
+
+function addNewItem( input ) {
+    if ( input.length > 0 ) {
+        todoItems.push( input )
+        // showTodoItems()
+    }
+}
+
+function showTodoItems() {
+    let nodeArray = todoItems.map((item, i) => {
+        return app.createElement('li', item, {
+            attributes: {
+                id: i,
+                class: 'todoItem'
+            }
+        })
+    })
+    app.insertToDOM('#TODOitem', nodeArray)
+}
+showTodoItems()
+
+app.onKeyPressDown('input', e => {
+    console.log( e.key, app.val('input') )
+    if ( e.key === 'Enter' ) {
+        addNewItem( app.val('input') )
+    }
+})
+
+// app.bindInputToElement('input', '#search')
+
+// var nodeArray = ['h1', 'h2', 'h3'].map((nodeName, i) => {
+//     return app.createElement(nodeName, {
+//         attributes: {
+//             id: i,
+//             class: 'node'
+//         },
+//         text: `This is a <${ nodeName }> tag.`
+//     })
+// })
+// app.appendToDOM(nodeArray)
+// var h1 = app.createElement('h1', 'Hello, World!')
+// var h2 = app.createElement('h2', 'Goodbye World.')
+// app.appendToDOM([h1, h2])
+/*
 // creates a div node => <div></div>
 var div = app.createElement('div', {
     attributes: {
@@ -9,21 +59,20 @@ var div = app.createElement('div', {
 })
 
 // appends to the elements DOM
-/*
-    <div id='#app'>
-        <div></div>
-    </div>
-*/
+// <div id='#app'>
+//     <div></div>
+// </div>
+
+
 app.appendToDOM(div)
 
 // creates a nodeArray
-/*
-    var elements = [
-        <p id='0'>sleep</p>,
-        <p id='1'>eat</p>,
-        <p id='2'>code</p>
-    ]
-*/
+// var elements = [
+//     <p id='0'>sleep</p>,
+//     <p id='1'>eat</p>,
+//     <p id='2'>code</p>
+// ]
+
 var items = ['sleep', 'eat', 'code' ]
 var nodeArray = items.map((item, i) => {
     return app.createElement('p', item, {
@@ -45,10 +94,10 @@ app.appendToDOM('div',
         text: 'hello, world'
     })
 )
-// or
-// var items = ['sleep', 'eat', 'code' ]
-// items.forEach((item, i) => {
-// })
+ // or
+ var items = ['sleep', 'eat', 'code' ]
+ items.forEach((item, i) => {
+ })
 
 
 
@@ -104,3 +153,4 @@ app.switch('.btn',
 
 // two way data binding between a inpuit feild and a HTML element
 app.bindInputToElement('input', 'h1')
+*/

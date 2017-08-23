@@ -1,11 +1,11 @@
 /**
-* @typedef {DOM} appDOM
+* @typedef {document} appDOM
 * This is the DOM that the getElementById() returns back to ginger class
 * after the constructor has been intialized
 */
 
 /**
- * @typedef {object} nodeObject
+ * @typedef {(node|object)} nodeObject
  * This is the node that is return after creation from the document API methods
  * giving you access to the its protoyes and properties
  */
@@ -28,8 +28,8 @@
  */
 
 /**
- * @typedef {(string|nodeObject|nodeObj|arrayOfNodes)} context
- * This is the contentx
+ * @typedef {(string|nodeObject|arrayOfNodes)} context
+ * This is the content that is given it can be string, a {nodeObject} , or {nodeArray} .
  */
 
 
@@ -41,6 +41,8 @@
  * @returns {eventObj}
  */
 function returnEventObj( eventObj ) {
+      console.log( eventObj.type )
+      // creatign default event props in 'newEventObj'
       let newEventObj = {
           altKey: eventObj.altKey,
           crtlKey: eventObj.ctrlKey,
@@ -49,35 +51,31 @@ function returnEventObj( eventObj ) {
           srcElement: eventObj.srcElement,
           defaultPrevented: eventObj.defaultPrevented,
 
-          path: eventObj.path,
+          path: eventObj.path.slice(0, -1),
           type: eventObj.type
       }
 
       switch ( eventObj.type ) {
         case 'click':
-        newEventObj.fromElement = eventObj.fromElement
-        newEventObj.button = eventObj.button
-        newEventObj.clientCoordinates = {
-          x: eventObj.clientX,
-          y: eventObj.clientY
-        }
-        break
+                newEventObj.fromElement = eventObj.fromElement
+                newEventObj.button = eventObj.button
+                newEventObj.clientCoordinates = {
+                  x: eventObj.clientX,
+                  y: eventObj.clientY
+                }
+              break
         case 'keypress':
-        newEventObj.key = eventObj.key
-        newEventObj.keyCode = eventObj.keyCode
-        break
+                newEventObj.key = eventObj.key
+                newEventObj.keyCode = eventObj.keyCode
+              break
       }
+      console.log( newEventObj )
       return newEventObj
 }
 
 
-/**
- * @function
- * Returns a boolean value of weather a object is empty or not.
- * @param {object} obj a object
- * @returns {boolean}
- */
 const isEmptyObj = ( obj ) => Object.keys( obj ).length === 0 ? true : false;
+const isObject = ( dataType ) => typeof dataType === 'object' && !Array.isArray(dataType) ? true : false
 
 /**
   * @classdesc This is a the ginger class that maniputes the element on the DOM,
@@ -89,41 +87,33 @@ const isEmptyObj = ( obj ) => Object.keys( obj ).length === 0 ? true : false;
 function ginger( appId ) {
     // this the actual DOM of the web page
     this.document = document
-    /**
-     * This is the elements DOM or {nodeObj}
-     */
-    this.appDOM = this.document.getElementById(appId.slice(1))
 
-    // checks if the appDOM exist on the DOM
+    // This is the elements DOM or 'nodeObj'
+        // - if the appId was not given then check if for a HTML element/node call 'app'
+    this.appDOM = appId === undefined ? this.document.querySelector('app') : this.document.getElementById(appId.slice(1))
+
     if ( this.appDOM !== null ) {
 
-          /**
-           * Evaluets the node Obj that was passed and attaching that props and data to the node
-           * @param {string} propName
-           * @param {nodeObject} node
-           * @param {nodeObj} object
-           */
-          function evalNodeObj( propName, node, nodeObj ) {
-                switch ( propName ) {
-                    case 'text':
+        /**
+         * Evaluets the node Obj that was passed and attaching that props and data to the node
+         * @param {string} propName
+         * @param {nodeObject} node
+         * @param {nodeObj} object
+         */
+        function evalNodeObj( propName, node, nodeObj ) {
+              switch ( propName ) {
+                  case 'text':
                         // add the node context as a node text
                         nodeContext = this.document.createTextNode(nodeObj[propName]);
                         // apppend that context to the 'newNode'
                         node.appendChild(nodeContext);
-
-                        break
-                    case 'attributes':
+                      break
+                  case 'attributes':
                         new ginger(appId).setAttributes(node, nodeObj.attributes)
+                      break
+              }
+        }
 
-                        break
-                }
-          }
-
-        /**
-         * This is assigns the {context} to the title element of the webpages {DOM}
-         * @param {context} context This description on context is described on
-         * the typdef
-         */
         this.title = ( context ) => this.document.title = context;
 
         /**
@@ -142,11 +132,11 @@ function ginger( appId ) {
          * @param {string} el This is a query selector of HTML element
          * @returns {nodeObject}
          */
-        this.getElement =  function( el ) {
+        this.getElement = function( el ) {
               try {
                   return this.appDOM.querySelector(el)
               } catch (e) {
-                  throw new Error(`ginger.js: Element <${ el }> is out of ${ appId } scope.`)
+                  throw new Error(`ginger.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
               }
         }
 
@@ -160,7 +150,7 @@ function ginger( appId ) {
             try {
                 return this.appDOM.querySelector(el).parentNode || el.parentNode
             } catch (e) {
-                throw new Error(`ginger.js: Element <${ el }> is out of ${ appId } scope.`)
+                throw new Error(`ginger.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
             }
         }
 
@@ -189,7 +179,7 @@ function ginger( appId ) {
 
                     // if a nodeObj was given assign all the props from the attributes
                     // prop to the new node
-                    if ( ( nodeObj !== undefined ) && nodeObj.attributes !== undefined && !isEmptyObj( nodeObj.attributes ) ) {
+                    if ( nodeObj !== undefined && ( nodeObj.attributes !== undefined && !isEmptyObj( nodeObj.attributes ) ) ) {
                         this.setAttributes(newNode, nodeObj.attributes)
                     }
                     return newNode
@@ -199,7 +189,7 @@ function ginger( appId ) {
                         newNode.appendChild(node)
                     })
                     return newNode
-                } else if ( typeof context === 'object' ) {
+                } else if ( isObject(context) ) {
                     nodeObj = context
                     for (let e in nodeObj) {
                         if ( nodeObj[e] !== undefined ) {
@@ -208,6 +198,7 @@ function ginger( appId ) {
                     }
                 }
             }
+            // if there was no nodeName given then return undefined elese return the newNode
             return nodeName === undefined ? undefined : newNode
         }
 
@@ -247,10 +238,12 @@ function ginger( appId ) {
          * @returns {object}
          */
         this.getAttributes = function( el ) {
+            // if the el was a query string then pass that into querySelector
+            // if not then it must be a nodeObject and just assign that to el
             el = typeof el === 'string' ? this.appDOM.querySelector(el) : el,
                 attributes = {};
-            Array.prototype.forEach.call(el.attributes, i => {
-                attributes[i.name] = i.value;
+            Array.prototype.forEach.call(el.attributes, prop => {
+                attributes[prop.name] = prop.value;
             })
             return attributes
         }
@@ -259,20 +252,29 @@ function ginger( appId ) {
          * This method apppends a node to the {appDOM} or creates and appends a
          * HTML element/node/{nodeObject} to the {appDOM}
          * @param {(string|nodeObject)} el
-         * @param {(string|context)} context
+         * @param {context} context
          * @return {appDOM}
          */
         this.appendToDOM = function( el, context ) {
             if ( Array.isArray( el ) || Array.isArray( context ) ) {
                 // is the context is a array/nodeArray then use that as the nodes or the el that is array/nodeArray
-                Array.prototype.forEach.call(Array.isArray( context ) ? context : el, i => {
-                    // if 'el' is a nodeObject then append to that node to the appDOM else append to the appDOM
-                    return typeof el === 'object' ? el.appendChild(i) : this.appendToDOM(i)
+                Array.prototype.forEach.call(Array.isArray(context) ? context : el, node => {
+                    // if 'el' is a nodeObject then append to that node to the appDOM
+                    // else if 'el' is a string pass 'el' to appendToDOM() and the node
+                    // and it that not ture append to the appDOM
+                    return isObject(el) && !Array.isArray(el) ? el.appendChild(node) : typeof el === 'string' ? this.appendToDOM(el, node) : this.appendToDOM(node)
                 })
-            } else if ( ( el !== undefined && typeof el === 'object' ) && context === undefined ) {
-                  return this.appDOM.appendChild(el)
-            } else if ( typeof el === 'object' && context !== undefined ) {
-                return this.appendToDOM(el.appendChild(context))
+                return
+            } else if ( isObject(el) ) {
+                  if ( context === undefined ) {
+                      return this.appDOM.appendChild(el)
+                  } else {
+                      if ( this.inAppDOM(el) ) {
+                          return el.appendChild(context)
+                      } else {
+                          throw new Error(`ginger.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
+                      }
+                  }
             } else {
                   let parentNode, nodeName;
                   el = el.split(' ').length > 1 ? el.split(' ') : el
@@ -281,31 +283,28 @@ function ginger( appId ) {
                       // ex: [ 'div.container', 'div#first', 'p' ]
                       parentNode = el.slice(-2, -1)[0] // 'div#first'
                       if ( this.document.querySelector(parentNode) !== null ) {
-                          app.appendToDOM(
-                              newNode = this.createElement(el.slice(-1)[0], context, {
+                          this.appendToDOM(
+                              this.createElement(el.slice(-1)[0], context, {
                                   parentNode: this.document.querySelector(parentNode).localName || this.appDOM.localName
                               })
                           )
                       } else {
-                          throw new Error(`ginger.js: element ${ parentNode } does not exist in your appDOM.`)
+                          throw new Error(`ginger.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
                       }
                   } else {
                       var nodeQuerys = el === 'body' || el === appId ? [this.appDOM] : this.appDOM.querySelectorAll(el)
 
                       if ( typeof el === 'string' && context !== undefined ) {
                           if ( nodeQuerys.length !== 0 ) {
-                              if ( ![ 'div', 'span', 'ul', 'header', 'article' ].includes(el) ) {
-                                  return this.appDOM.appendChild(this.createElement(el, context))
-                              }
                               Array.prototype.forEach.call(nodeQuerys, node => {
-                                  if ( typeof context !== 'object' ) {
-                                      return node.appendChild(this.document.createTextNode(context))
+                                  if ( isObject(context) ) {
+                                      node.appendChild(context)
                                   } else {
-                                      return node.appendChild( context )
+                                      node.appendChild(this.document.createTextNode(context))
                                   }
                               })
                           } else {
-                              throw new Error(`ginger.js: ${ el } is a undefined element on your your appDOM.`)
+                              throw new Error(`ginger.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
                           }
                       }
                   }
@@ -318,8 +317,8 @@ function ginger( appId ) {
          * @param {string} context
          */
         this.insertText = function( el, context ) {
-            el = this.appDOM.querySelectorAll(el) || el
-            if ( typeof context === 'string' ) {
+            el = typeof el === 'string' ? this.appDOM.querySelectorAll(el) : [el]
+            if ( typeof context === 'string' || typeof context === 'number' ) {
                 Array.prototype.forEach.call(el, node => {
                     node.innerHTML = context;
                 })
@@ -328,7 +327,9 @@ function ginger( appId ) {
             }
         }
 
-
+        /**
+         *
+         */
         this.onKeyPress = function( elementName, handler ) {
             let elements = this.appDOM.querySelectorAll(elementName)
             Array.prototype.forEach.call(elements, node => {
@@ -339,6 +340,9 @@ function ginger( appId ) {
             })
         }
 
+        /**
+         *
+         */
         this.onKeyPressUp = function( elementName, handler ) {
             let elements = this.appDOM.querySelectorAll(elementName)
             Array.prototype.forEach.call(elements, node => {
@@ -349,6 +353,9 @@ function ginger( appId ) {
             })
         }
 
+        /**
+         *
+         */
         this.onKeyPressDown = function( elementName, handler ) {
             let elements = this.appDOM.querySelectorAll(elementName)
             Array.prototype.forEach.call(elements, node => {
@@ -359,6 +366,9 @@ function ginger( appId ) {
             })
         }
 
+        /**
+         *
+         */
         this.switch = function( trgEl, func1, func2 ) {
             var clicked = false;
 
@@ -373,8 +383,11 @@ function ginger( appId ) {
             })
         }
 
-        this.click = function( elementName, handler ) {
-            let elements = this.appDOM.querySelectorAll(elementName)
+        /**
+         *
+         */
+        this.click = function( el, handler ) {
+            let elements = isObject(el) ? el : this.appDOM.querySelectorAll(el)
             Array.prototype.forEach.call(elements, node => {
                   node.addEventListener('click', e => {
                        e = returnEventObj(e)
@@ -383,13 +396,19 @@ function ginger( appId ) {
             })
         }
 
+        /**
+         *
+         */
         this.display = function( el, action ) {
-            let elements = this.appDOM.querySelectorAll(el)
+            let elements = isObject(el) && !Array.isArray(el) ? el : this.appDOM.querySelectorAll(el)
             Array.prototype.forEach.call(elements, node => {
                  return node.style.display = action === undefined ? '' : 'none'
             })
         }
 
+        /**
+         *
+         */
         this.goTo = function(url, action) {
             try{
                 window.open(url, action === 'new-tab' ? '_blank' : '_self')
@@ -398,8 +417,14 @@ function ginger( appId ) {
             }
         }
 
+        /**
+         * This method gets the value of given input feild nodeObject or query string
+         * @param {(string|nodeObject)} el
+         * @param {context} context
+         * @return {string}
+         */
         this.val = function( el, context ) {
-            let elements = this.appDOM.querySelectorAll(el)
+            let elements = isObject(el) ? el : this.appDOM.querySelectorAll(el)
             if ( context ) {
                 Array.prototype.forEach.call(elements, node => {
                     return node.value = context
@@ -409,6 +434,15 @@ function ginger( appId ) {
             }
         }
 
+        /**
+         * This ethod makes a HTTP GET request to API's using the native API
+         * fetch to make the calls and return a callabck of the data and the
+         * status of the API call.
+         * @param {string} url A regualr url to a API or server returning JSON
+         * @param {function} callback the fucntion returned once the request is
+         * finished async
+         * @return {function}
+         */
         this.fetch = function( url, callback ) {
             const respObj = {};
 
@@ -434,13 +468,89 @@ function ginger( appId ) {
                 })
         }
 
+        /**
+         * This method allows two way data binding between a node/HTML element
+         * such as a p, h1-6, li, etc with a input feild.
+         * @param {string} trgInput
+         * @param {string} trgEl
+         */
         this.bindInputToElement = function( trgInput, trgEl ) {
             this.onKeyPressUp(trgInput, e => {
+                this.insertText(trgEl, this.val(trgInput))
+            })
+            this.onKeyPress(trgInput, e => {
                 this.insertText(trgEl, this.val(trgInput))
             })
             this.onKeyPressDown(trgInput, e => {
                 this.insertText(trgEl, this.val(trgInput))
             })
+        }
+
+        /**
+         * Pending method thinking about logic
+         */
+        this.insertToDOM = function( el, context ) {
+              if ( Array.isArray( el ) || Array.isArray( context ) ) {
+                  if ( typeof el === 'string' ) {
+                      var nodeQuerys = el === 'body' || el === appId ? [this.appDOM] : this.appDOM.querySelectorAll(el)
+
+                      if ( nodeQuerys.length !== 0 ) {
+                          Array.prototype.forEach.call(nodeQuerys, node => {
+                              if ( typeof context !== 'object' ) {
+                                  node.innerHTML = context
+                              } else {
+                                  node.innerHTML = ''
+                                  this.appendToDOM(node, context)
+                              }
+                          })
+                      } else {
+                          throw new Error(`ginger.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
+                      }
+                      return
+                } else if ( !Array.isArray(el) ) {
+                      el.innerHTML = '';
+                } else {
+                      this.appDOM.innerHTML = '';
+                }
+
+                nodeArray = Array.isArray( context ) ? context : el;
+                Array.prototype.forEach.call(nodeArray, node => {
+                    return !Array.isArray(el) ? this.appendToDOM(el, node) : this.appDOM.appendChild(node)
+                })
+            } else if ( isObject(el) ) {
+                  if ( context === undefined ) {
+                      this.appDOM.innerHTL = ''
+                      this.appDOM.appendChild(context)
+                  } else {
+                      if ( this.inAppDOM(el) ) {
+                          if ( isObject(context) ) {
+                              el.innerHTML = ''
+                              this.appendToDOM(el, context)
+                          } else {
+                              el.innerHTML = context
+                          }
+                      } else {
+                          throw new Error(`ginger.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
+                      }
+                  }
+            } else {
+                  let parentNode, nodeName;
+                  el = el.split(' ').length > 1 ? el.split(' ') : el
+
+                  if ( Array.isArray( el ) ) {
+                      // ex: [ 'div.container', 'div#first', 'p' ]
+                      parentNode = el.slice(-2, -1)[0] // 'div#first'
+                      if ( this.inAppDOM(parentNode) ) {
+                          this.insertToDOM(
+                              this.createElement(el.slice(-1)[0], context, {
+                                  parentNode: this.document.querySelector(parentNode).localName || this.appDOM.localName
+                              })
+                          )
+                      } else {
+                          throw new Error(`ginger.js: Element ${ parentNode } does not exist in your appDOM.`)
+                      }
+                  }
+            }
         }
 
     } else {
@@ -486,3 +596,13 @@ function ginger( appId ) {
 //         }
 //     }
 // }
+
+// if ( ![ 'div', 'span', 'ul', 'header', 'article' ].includes(el.localName) ) {
+//     return this.appDOM.appendChild(this.createElement(el, context))
+// }
+
+/**
+ * This method insert whatever data to a certain HTML or node on the appDOM
+ * @param {(string|nodeObject)} el
+ * @param {context} context
+ */
