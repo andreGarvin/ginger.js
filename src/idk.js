@@ -98,17 +98,22 @@ function idk( appId ) {
          * @param {nodeObject} node
          * @param {nodeObj} object
          */
-        function evalNodeObj( propName, node, nodeObj ) {
+        function evalNodeObj( node, propName, propValue) {
               switch ( propName ) {
                   case 'text':
                         // add the node context as a node text
-                        nodeContext = this.document.createTextNode(nodeObj[propName]);
+                        nodeContext = this.document.createTextNode(propValue);
                         // apppend that context to the 'newNode'
                         node.appendChild(nodeContext);
                       break
                   case 'attributes':
-                        new ginger(appId).setAttributes(node, nodeObj.attributes)
-                      break
+                      return appId ? new idk(appId).setAttributes(node, propValue) : new idk().setAttributes(node, propValue)
+                  case 'style':
+                          var styleStr = '';
+                          for (var s in propValue) {
+                              styleStr += `${s}: ${propValue[s]};`
+                          }
+                        return appId ? new idk(appId).setAttributes(node, { style: styleStr }) : new idk().setAttributes(node, { style: styleStr })
               }
         }
 
@@ -134,7 +139,7 @@ function idk( appId ) {
               try {
                   return this.appDOM.querySelector(el)
               } catch (e) {
-                  throw new Error(`ginger.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
+                  throw new Error(`idk.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
               }
         }
 
@@ -148,7 +153,7 @@ function idk( appId ) {
             try {
                 return this.appDOM.querySelector(el).parentNode || el.parentNode
             } catch (e) {
-                throw new Error(`ginger.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
+                throw new Error(`idk.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
             }
         }
 
@@ -189,9 +194,9 @@ function idk( appId ) {
                     return newNode
                 } else if ( isObject(context) ) {
                     nodeObj = context
-                    for (let e in nodeObj) {
-                        if ( nodeObj[e] !== undefined ) {
-                            evalNodeObj(e, newNode, nodeObj)
+                    for (let prop in nodeObj) {
+                        if ( nodeObj[prop] !== undefined ) {
+                            evalNodeObj(newNode, prop, nodeObj[prop])
                         }
                     }
                 }
@@ -221,11 +226,15 @@ function idk( appId ) {
                 // the attributes from attributeObj given to each node in the appDOM
                 Array.prototype.forEach.call(nodeQuerys, node => {
                     for (var i in attributeObj) {
-                        node.setAttribute(i, attributeObj[i])
+                        if ( i === 'style' && isObject( attributeObj[i] ) ) {
+                            evalNodeObj(node, i, attributeObj[i])
+                        } else {
+                            node.setAttribute(i, attributeObj[i])
+                        }
                     }
                 })
             } else {
-                throw new Error(`ginger.js: ${ attributeObj === undefined ? 'Must provide a target element to set Attribute' : '' }.`)
+                throw new Error(`idk.js: ${ attributeObj === undefined ? 'Must provide a target element to set Attribute' : '' }.`)
             }
         }
 
@@ -267,10 +276,11 @@ function idk( appId ) {
                   if ( context === undefined ) {
                       return this.appDOM.appendChild(el)
                   } else {
-                      if ( this.inAppDOM(el) ) {
+                      const constructorObj = Array.from( arguments ).slice(-1)[0]
+                      if ( this.inAppDOM(el) || constructorObj.type === 'constructor' ) {
                           return el.appendChild(context)
                       } else {
-                          throw new Error(`ginger.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
+                          throw new Error(`idk.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
                       }
                   }
             } else {
@@ -287,7 +297,7 @@ function idk( appId ) {
                               })
                           )
                       } else {
-                          throw new Error(`ginger.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
+                          throw new Error(`idk.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
                       }
                   } else {
                       var nodeQuerys = el === 'body' || el === appId ? [this.appDOM] : this.appDOM.querySelectorAll(el)
@@ -302,7 +312,7 @@ function idk( appId ) {
                                   }
                               })
                           } else {
-                              throw new Error(`ginger.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
+                              throw new Error(`idk.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
                           }
                       }
                   }
@@ -321,13 +331,10 @@ function idk( appId ) {
                     node.innerHTML = context;
                 })
             } else {
-                throw new Error(`ginger.js: This method takes data type of string, given context is of type ${ typeof context }`)
+                throw new Error(`idk.js: This method takes data type of string, given context is of type ${ typeof context }`)
             }
         }
 
-        /**
-         *
-         */
         this.onKeyPress = function( elementName, handler ) {
             let elements = this.appDOM.querySelectorAll(elementName)
             Array.prototype.forEach.call(elements, node => {
@@ -338,9 +345,6 @@ function idk( appId ) {
             })
         }
 
-        /**
-         *
-         */
         this.onKeyPressUp = function( elementName, handler ) {
             let elements = this.appDOM.querySelectorAll(elementName)
             Array.prototype.forEach.call(elements, node => {
@@ -351,9 +355,6 @@ function idk( appId ) {
             })
         }
 
-        /**
-         *
-         */
         this.onKeyPressDown = function( elementName, handler ) {
             let elements = this.appDOM.querySelectorAll(elementName)
             Array.prototype.forEach.call(elements, node => {
@@ -381,8 +382,49 @@ function idk( appId ) {
             })
         }
 
+        this.constructElement = function(elementName, nodeObj) {
+              if ( typeof elementName === 'string' ) {
+                  const constructedNode = this.createElement(elementName, { attributes: nodeObj.attributes } || undefined )
+                  for (let prop in nodeObj) {
+                        if  ( prop !== 'attributes' ) {
+                            switch ( prop ) {
+                                 case 'childern':
+                                        if ( isObject(nodeObj[prop]) ) {
+                                            for (let c in nodeObj[prop]) {
+                                                this.appendToDOM(constructedNode,
+                                                    this.createElement(c,nodeObj[prop][c]),
+                                                    { type: 'constructor', data: nodeObj[prop] }
+                                                )
+                                            }
+                                        } else if ( Array.isArray(nodeObj[prop]) ) {
+                                            for(let c in nodeObj[prop]) {
+                                                this.appendToDOM(constructedNode,
+                                                    nodeObj[prop][c],
+                                                    { type: 'constructor', data: nodeObj[prop] }
+                                                )
+                                            }
+                                        }
+                                      break
+                                 default:
+                                       this.appendToDOM(constructedNode,
+                                           this.createElement(prop, nodeObj[prop]),
+                                           { type: 'constructor', data: nodeObj[prop] }
+                                       )
+                                     break
+                            }
+                        }
+                  }
+                  this.appendToDOM(constructedNode)
+              } else {
+                 throw new Error(`ikd.js: Element could not bre construcuted check you nodeObject for any errors.`)
+              }
+        }
+
         /**
-         *
+         * This method is a click handler
+         * @param {(string|nodeObject)} el
+         * @param {function} handler
+         * @return
          */
         this.click = function( el, handler ) {
             let elements = isObject(el) ? el : this.appDOM.querySelectorAll(el)
@@ -394,9 +436,6 @@ function idk( appId ) {
             })
         }
 
-        /**
-         *
-         */
         this.display = function( el, action ) {
             let elements = isObject(el) && !Array.isArray(el) ? el : this.appDOM.querySelectorAll(el)
             Array.prototype.forEach.call(elements, node => {
@@ -405,13 +444,15 @@ function idk( appId ) {
         }
 
         /**
-         *
+         * This method transfers to another website or opens the wbesite in another tab
+         * @param {string} url a regular url
+         * @param {string} action This is a argument determines weather to open in the same tab or different tab
          */
         this.goTo = function(url, action) {
             try{
                 window.open(url, action === 'new-tab' ? '_blank' : '_self')
             } catch (e) {
-                return new Error(e)
+                throw new Error(e)
             }
         }
 
@@ -502,7 +543,7 @@ function idk( appId ) {
                               }
                           })
                       } else {
-                          throw new Error(`ginger.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
+                          throw new Error(`idk.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
                       }
                       return
                 } else if ( !Array.isArray(el) ) {
@@ -528,7 +569,7 @@ function idk( appId ) {
                               el.innerHTML = context
                           }
                       } else {
-                          throw new Error(`ginger.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
+                          throw new Error(`idk.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
                       }
                   }
             } else {
@@ -545,14 +586,14 @@ function idk( appId ) {
                               })
                           )
                       } else {
-                          throw new Error(`ginger.js: Element ${ parentNode } does not exist in your appDOM.`)
+                          throw new Error(`idk.js: Element ${ parentNode } does not exist in your appDOM.`)
                       }
                   }
             }
         }
 
     } else {
-        return new Error(`ginger.js: id '${ appId }' does not exist.`)
+        return new Error(`idk.js: id '${ appId }' does not exist.`)
     }
 }
 

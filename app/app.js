@@ -35,22 +35,29 @@ app.onKeyPressDown('input', e => {
     }
 })
 
-// app.bindInputToElement('input', '#search')
 
-// var nodeArray = ['h1', 'h2', 'h3'].map((nodeName, i) => {
-//     return app.createElement(nodeName, {
-//         attributes: {
-//             id: i,
-//             class: 'node'
-//         },
-//         text: `This is a <${ nodeName }> tag.`
-//     })
-// })
-// app.appendToDOM(nodeArray)
-// var h1 = app.createElement('h1', 'Hello, World!')
-// var h2 = app.createElement('h2', 'Goodbye World.')
-// app.appendToDOM([h1, h2])
+
 /*
+
+  // More things you can do with idk
+
+app.bindInputToElement('input', '#search')
+
+var nodeArray = ['h1', 'h2', 'h3'].map((nodeName, i) => {
+    return app.createElement(nodeName, {
+        attributes: {
+            id: i,
+            class: 'node'
+        },
+        text: `This is a <${ nodeName }> tag.`
+    })
+})
+app.appendToDOM(nodeArray)
+
+var h1 = app.createElement('h1', 'Hello, World!')
+var h2 = app.createElement('h2', 'Goodbye World.')
+app.appendToDOM([h1, h2])
+
 // creates a div node => <div></div>
 var div = app.createElement('div', {
     attributes: {
@@ -59,19 +66,17 @@ var div = app.createElement('div', {
 })
 
 // appends to the elements DOM
-// <div id='#app'>
-//     <div></div>
-// </div>
-
-
+    // <div id='#app'>
+    //     <div></div>
+    // </div>
 app.appendToDOM(div)
 
 // creates a nodeArray
-// var elements = [
-//     <p id='0'>sleep</p>,
-//     <p id='1'>eat</p>,
-//     <p id='2'>code</p>
-// ]
+    // var elements = [
+    //     <p id='0'>sleep</p>,
+    //     <p id='1'>eat</p>,
+    //     <p id='2'>code</p>
+    // ]
 
 var items = ['sleep', 'eat', 'code' ]
 var nodeArray = items.map((item, i) => {
@@ -94,12 +99,17 @@ app.appendToDOM('div',
         text: 'hello, world'
     })
 )
- // or
- var items = ['sleep', 'eat', 'code' ]
- items.forEach((item, i) => {
- })
 
-
+// or
+var items = ['sleep', 'eat', 'code' ]
+items.forEach((item, i) => {
+      app.appendToDOM('#app p',{
+          attributes: {
+              id: i
+          },
+          text: item
+      })
+})
 
 
 // this is changing the title of the browser tab window
@@ -153,4 +163,42 @@ app.switch('.btn',
 
 // two way data binding between a inpuit feild and a HTML element
 app.bindInputToElement('input', 'h1')
+
+
+// purely experimental might remove it
+app.constructElement('div', {
+    attributes: {
+        class: 'todo-items-container',
+        style: {
+            'background-color': 'red',
+            color: 'white'
+        }
+    },
+    p: {
+        attributes: {
+            style: {
+                color: 'blue'
+            },
+        },
+        text: 'hello, world'
+    },
+    img: {
+        attributes: {
+            style: {
+                height: '200px'
+            },
+            src: 'http://kids.nationalgeographic.com/content/dam/kids/photos/animals/Mammals/A-G/giant-panda-eating.ngsversion.1411231575277.adapt.1900.1.jpg'
+        }
+    },
+    childern: {
+        ul: ['code', 'sleep', 'code'].map((item, i) => {
+            return app.createElement('li', {
+                attributes: {
+                    id: i
+                },
+                text: item
+            })
+        })
+    }
+})
 */
