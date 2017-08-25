@@ -450,6 +450,19 @@ function idk( appId ) {
             })
         }
 
+        /**
+         * This is a experimental peice of the library
+         */
+        compareAppDOM = function( appDOM, newNode ) {
+            Array.prototype.forEach.call(appDOM.children, node => {
+                if ( node.innerHTML ) {
+                    if ( ( node.localName === newNode.localName ) && ( node.innerHTML !== newNode.innerHTML ) ) {
+                        node.innerHTML = newNode.innerHTML
+                    }
+                }
+            })
+        }
+
         this.display = function( el, action ) {
             let elements = isObject(el) && !Array.isArray(el) ? el : this.appDOM.querySelectorAll(el)
             Array.prototype.forEach.call(elements, node => {
