@@ -103,7 +103,9 @@ function idk( appId ) {
          * @function
          */
         function evalNodeObj( node, propName, propValue ) {
-              const appDOM = argument
+              // gets the this.appDOM passed to the fucntion because 'this'
+              // is not bind the class idk
+              let appDOM = Array.from( arguments ).slice(-1)[0]
               switch ( propName ) {
                   // appends text to the node
                   case 'text':
@@ -114,23 +116,28 @@ function idk( appId ) {
                       break
                   // sets the attributes to the node
                   case 'attributes':
-                      // becasue this is a fucntion this has not context and could not bind to the class idk
-                      // make a new but same intsance of the idk and strget the lement in its DOM
-                      return appId ? new idk(appId).setAttributes(node, propValue) : new idk().setAttributes(node, propValue)
+                      return appDOM.setAttributes(node, propValue)
+                  // sets the styles of the node and gets the propValue of the
+                  // style object and concatinates the key with its value to the styleStr
                   case 'style':
                           var styleStr = '';
                           for (var s in propValue) {
                               styleStr += `${s}: ${propValue[s]};`
                           }
-                        return appId ? new idk(appId).setAttributes(node, { style: styleStr }) : new idk().setAttributes(node, { style: styleStr })
+                        return appDOM.setAttributes(node, { style: styleStr })
               }
         }
 
+        /**
+         * idk it thought it would be usful I guess, it takes a {context}
+         * This method sets the context to the web app's title
+         * @param {context} context This descibed in the context typedef
+         */
         this.title = ( context ) => this.document.title = context;
 
         /**
-         * Dispate the longest tutils I have ven don this is method returns a
-         * boolean value wather the element of the query string or {nodeObject}
+         * Dispite have the longest turtils I have ever done; This method returns a
+         * boolean value weather or not the element of the query string or {nodeObject}
          * is inside the {appDOM}
          * @param {(string|nodeObject)} el This is a query selector of HTML
          * element or a {nodeObject}
@@ -153,13 +160,15 @@ function idk( appId ) {
         }
 
         /**
-         * Returns back the parent of the element query string selected on the
-         * {appDOM} or a {nodeObject}
+         * This method returns back the parent of the HTML element/node or
+         * query string selected if is node not have a parent it returns back
+         * the nodes parentNode value
          * @param {(string|nodeObject)} el This is a query selector of HTML element
          * @returns {nodeObject}
          */
         this.getParentNode = function( el ) {
             try {
+                // if the 'parentNode' value is null then return the nodes 'parentNode' value
                 return this.appDOM.querySelector(el).parentNode || el.parentNode
             } catch (e) {
                 throw new Error(`idk.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
@@ -169,54 +178,56 @@ function idk( appId ) {
         /**
          * This method creates a HTML elemnet or a custom tag and returns back
          * that element/ {nodeObject} and sets any atrributes if given a {nodeObj}
-         * and appends/injects whateve the {context} that was given.
+         * and appends/injects whatever the {context} that was given.
          * @param {string} nodeName name of the desired node/HTML element
-         * @param {(string|context)} context This is described in the typedef of {context}
+         * @param {(string|context)} context This is described in the typedef of context
          * @param {nodeObj} nodeObj This is descirbed in the typedef of {nodeObj}
          * @returns {nodeObject}
          */
         this.createElement = function( nodeName, context, nodeObj ) {
-            // creates the node element that is empty with no childern or parent node
-            let newNode = this.document.createElement(nodeName)
+            if ( nodeName ) {
 
-            // checks if a context was given in not or a nodeObj
-            // was replaced as the conext
-            if ( context !== undefined ) {
+                // creates the node element that is empty with no childern or parent node
+                let newNode = this.document.createElement(nodeName)
 
-                if ( typeof context === 'string' ) {
-                    // add the node context as a node text
-                    nodeContext = this.document.createTextNode(context);
-                    // apppend that context to the 'newNode'
-                    newNode.appendChild(nodeContext);
+                // checks if a context was given, if the undefined a nodeObj was replaced as the context
+                if ( context !== undefined ) {
 
-                    // if a nodeObj was given assign all the props from the attributes
-                    // prop to the new node
-                    if ( nodeObj !== undefined && ( nodeObj.attributes !== undefined && !isEmptyObj( nodeObj.attributes ) ) ) {
-                        this.setAttributes(newNode, nodeObj.attributes)
-                    }
-                    return newNode
-                } else if ( Array.isArray(context) ) {
-                    // if the context is a nodeArray
-                    Array.prototype.forEach.call(context, node => {
-                        newNode.appendChild(node)
-                    })
-                    return newNode
-                } else if ( isObject(context) ) {
-                    nodeObj = context
-                    for (let prop in nodeObj) {
-                        if ( nodeObj[prop] !== undefined ) {
-                            evalNodeObj(newNode, prop, nodeObj[prop])
+                    if ( typeof context === 'string' ) {
+                        // add the node context as a node text
+                        nodeContext = this.document.createTextNode(context);
+                        // apppend that context to the 'newNode'
+                        newNode.appendChild(nodeContext);
+
+                        // if a nodeObj was given assign all the props from the attributes
+                        // prop to the new node
+                        if ( nodeObj !== undefined && ( nodeObj.attributes !== undefined && !isEmptyObj( nodeObj.attributes ) ) ) {
+                            this.setAttributes(newNode, nodeObj.attributes)
+                        }
+                        return newNode
+                    } else if ( Array.isArray(context) ) {
+                        // if the context is a nodeArray
+                        Array.prototype.forEach.call(context, node => {
+                            newNode.appendChild(node)
+                        })
+                        return newNode
+                    } else if ( isObject(context) ) {
+                        nodeObj = context
+                        for (let prop in nodeObj) {
+                            if ( nodeObj[prop] !== undefined ) {
+                                evalNodeObj(newNode, prop, nodeObj[prop])
+                            }
                         }
                     }
                 }
+                // if there was no nodeName given then return undefined elese return the newNode
+                return nodeName === undefined ? undefined : newNode
             }
-            // if there was no nodeName given then return undefined elese return the newNode
-            return nodeName === undefined ? undefined : newNode
         }
 
         /**
-         * This methods sets the attributes from the {nodeObj} referred to as
-         * 'attributeObj' to the element query string of {nodeObject} that was
+         * This method sets the attributes from the {nodeObj} referred to as
+         * 'attributeObj' to the HTMl/node or query string given of {nodeObject} that was
          * passed to this method
          * @param {(string|nodeObject)} el This is a query selector of HTML
          * element
@@ -235,6 +246,7 @@ function idk( appId ) {
                 // the attributes from attributeObj given to each node in the appDOM
                 Array.prototype.forEach.call(nodeQuerys, node => {
                     for (var i in attributeObj) {
+                        // pass the the style object to the eval evalNodeObj
                         if ( i === 'style' && isObject( attributeObj[i] ) ) {
                             evalNodeObj(node, i, attributeObj[i])
                         } else {
@@ -267,25 +279,30 @@ function idk( appId ) {
         /**
          * This method apppends a node to the {appDOM} or creates and appends a
          * HTML element/node/{nodeObject} to the {appDOM}
-         * @param {(string|nodeObject)} el
-         * @param {context} context
+         * @param {(string|nodeObject)} el This is a query selector of HTML element or a {nodeObject}
+         * @param {context} context This is described in the typedef of context
          * @return {appDOM}
          */
         this.appendToDOM = function( el, context ) {
             if ( Array.isArray( el ) || Array.isArray( context ) ) {
                 // is the context is a array/nodeArray then use that as the nodes or the el that is array/nodeArray
                 Array.prototype.forEach.call(Array.isArray(context) ? context : el, node => {
-                    // if 'el' is a nodeObject then append to that node to the appDOM
-                    // else if 'el' is a string pass 'el' to appendToDOM() and the node
-                    // and it that not ture append to the appDOM
+                    /*
+                        if 'el' is a nodeObject then append to that node to the appDOM
+                        else if 'el' is a string pass 'el' to appendToDOM() and the node
+                        and it that not ture append to the appDOM
+                    */
                     return isObject(el) && !Array.isArray(el) ? el.appendChild(node) : typeof el === 'string' ? this.appendToDOM(el, node) : this.appendToDOM(node)
                 })
                 return
             } else if ( isObject(el) ) {
+                  // if el is nodeObject
                   if ( context === undefined ) {
                       return this.appDOM.appendChild(el)
                   } else {
+                      // if the createElement was given a constructorObj
                       const constructorObj = Array.from( arguments ).slice(-1)[0]
+
                       if ( this.inAppDOM(el) || constructorObj.type === 'constructor' ) {
                           return el.appendChild(context)
                       } else {
@@ -296,12 +313,18 @@ function idk( appId ) {
                   let parentNode, nodeName;
                   el = el.split(' ').length > 1 ? el.split(' ') : el
 
+                  // checks to see if the query string was given a 'parentNode' name
                   if ( Array.isArray( el ) ) {
                       // ex: [ 'div.container', 'div#first', 'p' ]
                       parentNode = el.slice(-2, -1)[0] // 'div#first'
-                      if ( this.document.querySelector(parentNode) !== null ) {
+
+                      // if the 'parentNode' was found in the 'appDOM'
+                      if ( this.inAppDOM(parentNode) ) {
+                          let childName = el.slice(-1)[0]
+
+                          // creates the element if the element and appens to the 'parnetNode' or the 'appDOM'
                           this.appendToDOM(
-                              this.createElement(el.slice(-1)[0], context, {
+                              this.createElement(childName, context, {
                                   parentNode: this.document.querySelector(parentNode).localName || this.appDOM.localName
                               })
                           )
@@ -309,17 +332,23 @@ function idk( appId ) {
                           throw new Error(`idk.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
                       }
                   } else {
+                      // if the el was string that had no parentNode
+
+                      // check if  el is a string of body or the 'appId' name pass
+                      // 'this.appDOM' in a array or check get all the elements on the 'appDOM'
                       var nodeQuerys = el === 'body' || el === appId ? [this.appDOM] : this.appDOM.querySelectorAll(el)
 
                       if ( nodeQuerys.length !== 0 ) {
+                          // appends the context to all the nodes that were found and matche query string
                           Array.prototype.forEach.call(nodeQuerys, node => {
                                 if ( isObject(context) ) {
-                                  node.appendChild(context)
+                                    node.appendChild(context)
                                 } else {
-                                  node.appendChild(this.document.createTextNode(context))
+                                    node.appendChild(this.document.createTextNode(context))
                                 }
                           })
                       } else {
+                          // if some data was given append it to the appDOM
                           if ( el !== undefined && context === undefined ) {
                               this.appDOM.appendChild(
                                   this.document.createTextNode(el)
@@ -333,51 +362,85 @@ function idk( appId ) {
         }
 
         /**
-         * This method inserts text into a node element
-         * @param {(string|nodeObject)} el
-         * @param {string} context
+         * This method inserts text into a HTML element/ node
+         * @param {(string|nodeObject)} el This is a query selector of HTML element
+         * @param {(string|number)} context the context can be a string or a number
          */
         this.insertText = function( el, context ) {
-            el = typeof el === 'string' ? this.appDOM.querySelectorAll(el) : [el]
-            if ( typeof context === 'string' || typeof context === 'number' ) {
-                Array.prototype.forEach.call(el, node => {
-                    node.innerHTML = context;
-                })
-            } else {
-                throw new Error(`idk.js: This method takes data type of string, given context is of type ${ typeof context }`)
-            }
+              el = typeof el === 'string' ? this.appDOM.querySelectorAll(el) : [el]
+              if ( typeof context === 'string' || typeof context === 'number' ) {
+                  Array.prototype.forEach.call(el, node => {
+                      node.innerHTML = context;
+                  })
+              } else {
+                  throw new Error(`idk.js: This method takes data type of string, given context is of type ${ typeof context }`)
+              }
         }
 
+        /**
+         * This method is catches keypresses events
+         * @param {string} elementName The name of the HTML element
+         * @param {function} handler This the callback return back from the method
+         * @return {function}
+         */
         this.onKeyPress = function( elementName, handler ) {
             let elements = this.appDOM.querySelectorAll(elementName)
             Array.prototype.forEach.call(elements, node => {
+                  // check if the node event is a keypress
                   node.addEventListener('keypress', e => {
+                      // get the event Object that was passed from the callback
                       e = returnEventObj(e)
+                      // return new event object
                       return handler(e)
                   })
             })
         }
 
+        /**
+         * This method is catches keyup presses events
+         * @param {string} elementName The name of the HTML element
+         * @param {function} handler This the callback return back from the method
+         * @return {function}
+         */
         this.onKeyPressUp = function( elementName, handler ) {
             let elements = this.appDOM.querySelectorAll(elementName)
             Array.prototype.forEach.call(elements, node => {
+                  // check if the node event is a keyup
                   node.addEventListener('keyup', e => {
+                      // get the event Object that was passed from the callback
                       e = returnEventObj(e)
+                      // return new event object
                       return handler(e)
                   })
             })
         }
 
+        /**
+         * This method is catches keydown presses events
+         * @param {string} elementName The name of the HTML element
+         * @param {function} handler This the callback return back from the method
+         * @return {function}
+         */
         this.onKeyPressDown = function( elementName, handler ) {
             let elements = this.appDOM.querySelectorAll(elementName)
-            Array.prototype.forEach.call(elements, node => {
-                  node.addEventListener('keydown', e => {
+            Array.prototype.forEach.call(elements, node =>
+                  // check if the node event is a keydown
+                  node.addEventListener('keydown', e =>
+                      // get the event Object that was passed from the callback
                       e = returnEventObj(e)
+                      // return new event object
                       return handler(e)
                   })
             })
         }
 
+        /**
+         * This method is like switch to trigger to different functions when clicked like a click
+         * @param {string} trgEl
+         * @param {function} func1
+         * @param {function} func2
+         * @return {function}
+         */
         this.switch = function( trgEl, func1, func2 ) {
             var clicked = false;
 
@@ -391,6 +454,13 @@ function idk( appId ) {
             })
         }
 
+        /**
+         * This method contsructs a a custom element or a HTML structure,
+         * this is almost liek beuilding a component but not really, it is a
+         * very ugly way of doing it
+         * @param {(string|nodeObject)} elementName This is a HTML element/node or query string
+         * @param {nodeObj} nodeObj This is descibed in the nodeObj
+         */
         this.constructElement = function(elementName, nodeObj) {
               if ( typeof elementName === 'string' ) {
                   const constructedNode = this.createElement(elementName, nodeObj === undefined ? undefined : { attributes: nodeObj.attributes } )
@@ -424,49 +494,41 @@ function idk( appId ) {
                         }
                   }
 
-                  if ( this.appDOM.querySelectorAll(elementName).length !== 0 ) {
-                      compareAppDOM(this.appDOM, constructedNode)
-                  } else {
-                      this.appendToDOM(constructedNode)
-                  }
+                  this.appendToDOM(constructedNode)
               } else {
                  throw new Error(`ikd.js: Element could not bre construcuted check you nodeObject for any errors.`)
               }
         }
 
         /**
-         * This method is a click handler
-         * @param {(string|nodeObject)} el
-         * @param {function} handler
-         * @return
+         * This method is a click handler that returns a callback passing back the event Object
+         * @param {(string|nodeObject)} el This is a query selector of HTML element
+         * @param {function} handler This the callback return back from the method
+         * @return {function}
          */
         this.click = function( el, handler ) {
             let elements = isObject(el) ? el : this.appDOM.querySelectorAll(el)
             Array.prototype.forEach.call(elements, node => {
+                  // check if the node event is a keydown
                   node.addEventListener('click', e => {
+                       // get the event Object that was passed from the callback
                        e = returnEventObj(e)
+                       // return new event object
                        return handler(e)
                   })
             })
         }
 
         /**
-         * This is a experimental peice of the library
+         * This method displays or hides the HTML elements or nodes on the appDOM
+         * deppening on the 'action'
+         * @param {(string|nodeObject)} el This is a query selector of HTML element or a node Object
+         * @param {string} action
          */
-        compareAppDOM = function( appDOM, newNode ) {
-            Array.prototype.forEach.call(appDOM.children, node => {
-                if ( node.innerHTML ) {
-                    if ( ( node.localName === newNode.localName ) && ( node.innerHTML !== newNode.innerHTML ) ) {
-                        node.innerHTML = newNode.innerHTML
-                    }
-                }
-            })
-        }
-
         this.display = function( el, action ) {
             let elements = isObject(el) && !Array.isArray(el) ? el : this.appDOM.querySelectorAll(el)
             Array.prototype.forEach.call(elements, node => {
-                 return node.style.display = action === undefined ? '' : 'none'
+                return node.style.display = action === undefined ? '' : 'none'
             })
         }
 
@@ -485,17 +547,19 @@ function idk( appId ) {
 
         /**
          * This method gets the value of given input feild nodeObject or query string
-         * @param {(string|nodeObject)} el
-         * @param {context} context
+         * @param {(string|nodeObject)} el This is a query selector of HTML element or a node Object
+         * @param {string} context This is the string passed to this method
          * @return {string}
          */
         this.val = function( el, context ) {
             let elements = isObject(el) ? el : this.appDOM.querySelectorAll(el)
-            if ( context !== undefined ) {
+            if ( context !== undefined || context !== null ) {
+                // sets the value of all the input feild to the gven context
                 Array.prototype.forEach.call(elements, node => {
-                    node.value = context
+                    node.value = context.toString()
                 })
             } else {
+                // returns back the last input feilds value
                 return elements[elements.length - 1].value
             }
         }
@@ -522,7 +586,6 @@ function idk( appId ) {
                     resp.json()
                         .then(respJSON => {
                             respObj.data = respJSON
-
                             return callback( respObj )
                         })
                         .catch(() => {
@@ -530,15 +593,18 @@ function idk( appId ) {
                         })
                 })
                 .catch(err => {
-                    return callback( err )
+                    respObj.err = err
+                    return callback( respObj )
                 })
         }
 
         /**
          * This method allows two way data binding between a node/HTML element
+         * on any keypress the data from the input fileds value will be inserted
+         * into the HTML element or node
          * such as a p, h1-6, li, etc with a input feild.
-         * @param {string} trgInput
-         * @param {string} trgEl
+         * @param {(string|nodeObject)} trgInput This can be either a query string or nodeObject
+         * @param {(string|nodeObject)} trgEl This can be either a query string or nodeObject
          */
         this.bindInputToElement = function( trgInput, trgEl ) {
             this.onKeyPressUp(trgInput, e => {
@@ -553,7 +619,9 @@ function idk( appId ) {
         }
 
         /**
-         * Pending method thinking about logic
+         * This method inserts a given context to a certain element or node in the appDOM
+         * @param {(string|nodeObject)} el This is a query selector of HTML element or a node Object
+         * @param {context} context This is described in the typedef of context
          */
         this.insertToDOM = function( el, context ) {
               if ( Array.isArray( el ) || Array.isArray( context ) ) {
@@ -643,52 +711,3 @@ function idk( appId ) {
         return new Error(`idk.js: id '${ appId }' does not exist.`)
     }
 }
-
-
-
-
-
-
-
-// if ( nodeObj.parentNode !== undefined ) {
-//     return nodeObj.parentNode.appendChild(newNode)
-// } else {
-//     return this.appDOM.appendChild(newNode)
-// }
-
-// if ( ['ul', 'ol' ].includes( el.toLowerCase() ) ) {
-//     return this.createElement('li', context, this.appDOM.querySelectorAll(el) || this.appDOM)
-// } else if ( [ 'div', 'span' ].includes( el.toLowerCase() ) ) {
-//     return this.createElement(el, context)
-// }
-
-// else {
-//
-//     if ( context === undefined && el !== undefined ) {
-//         context = el
-//         return this.appDOM.appendChild(this.document.createTextNode(context))
-//     } else {
-//
-//         if ( this.appDOM.querySelectorAll(el).length !== 0 ) {
-//             Array.prototype.forEach.call(document.querySelectorAll(el), node => {
-//                 try {
-//                     node.appendChild(context)
-//                 } catch (e) {
-//                     node.appendChild(this.createElement(el, context))
-//                 }
-//             })
-//         } else {
-//             // this.createElement(el, context)
-//         }
-//     }
-// }
-
-// if ( ![ 'div', 'span', 'ul', 'header', 'article' ].includes(el.localName) ) {
-//     return this.appDOM.appendChild(this.createElement(el, context))
-// }
-
-/**
- * This method insert whatever data to a certain HTML or node on the appDOM
- * @param {(string|nodeObject)} el
- * @param {context} context
- */
