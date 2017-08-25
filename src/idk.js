@@ -302,15 +302,19 @@ function idk( appId ) {
                   } else {
                       var nodeQuerys = el === 'body' || el === appId ? [this.appDOM] : this.appDOM.querySelectorAll(el)
 
-                      if ( typeof el === 'string' && context !== undefined ) {
-                          if ( nodeQuerys.length !== 0 ) {
-                              Array.prototype.forEach.call(nodeQuerys, node => {
-                                  if ( isObject(context) ) {
-                                      node.appendChild(context)
-                                  } else {
-                                      node.appendChild(this.document.createTextNode(context))
-                                  }
-                              })
+                      if ( nodeQuerys.length !== 0 ) {
+                          Array.prototype.forEach.call(nodeQuerys, node => {
+                                if ( isObject(context) ) {
+                                  node.appendChild(context)
+                                } else {
+                                  node.appendChild(this.document.createTextNode(context))
+                                }
+                          })
+                      } else {
+                          if ( el !== undefined && context === undefined ) {
+                              this.appDOM.appendChild(
+                                  this.document.createTextNode(el)
+                              )
                           } else {
                               throw new Error(`idk.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
                           }
@@ -365,14 +369,10 @@ function idk( appId ) {
             })
         }
 
-        /**
-         *
-         */
         this.switch = function( trgEl, func1, func2 ) {
             var clicked = false;
 
             this.click(trgEl, e => {
-                  console.log( clicked )
                   if ( clicked === true ) {
                       clicked = false;
                       return func2( e )
@@ -384,7 +384,7 @@ function idk( appId ) {
 
         this.constructElement = function(elementName, nodeObj) {
               if ( typeof elementName === 'string' ) {
-                  const constructedNode = this.createElement(elementName, { attributes: nodeObj.attributes } || undefined )
+                  const constructedNode = this.createElement(elementName, nodeObj === undefined ? undefined : { attributes: nodeObj.attributes } )
                   for (let prop in nodeObj) {
                         if  ( prop !== 'attributes' ) {
                             switch ( prop ) {
@@ -414,7 +414,12 @@ function idk( appId ) {
                             }
                         }
                   }
-                  this.appendToDOM(constructedNode)
+
+                  if ( this.appDOM.querySelectorAll(elementName).length !== 0 ) {
+                      compareAppDOM(this.appDOM, constructedNode)
+                  } else {
+                      this.appendToDOM(constructedNode)
+                  }
               } else {
                  throw new Error(`ikd.js: Element could not bre construcuted check you nodeObject for any errors.`)
               }
@@ -433,6 +438,17 @@ function idk( appId ) {
                        e = returnEventObj(e)
                        return handler(e)
                   })
+            })
+        }
+
+        compareAppDOM = function( appDOM, newNode ) {
+
+            Array.prototype.forEach.call(appDOM.children, node => {
+                if ( node.innerHTML ) {
+                    if ( ( node.localName === newNode.localName ) && ( node.innerHTML !== newNode.innerHTML ) ) {
+                        node.innerHTML = newNode.innerHTML
+                    }
+                }
             })
         }
 
@@ -558,8 +574,8 @@ function idk( appId ) {
                 })
             } else if ( isObject(el) ) {
                   if ( context === undefined ) {
-                      this.appDOM.innerHTL = ''
-                      this.appDOM.appendChild(context)
+                      this.appDOM.innerHTML = ''
+                      this.appDOM.appendChild(el)
                   } else {
                       if ( this.inAppDOM(el) ) {
                           if ( isObject(context) ) {
@@ -574,9 +590,9 @@ function idk( appId ) {
                   }
             } else {
                   let parentNode, nodeName;
-                  el = el.split(' ').length > 1 ? el.split(' ') : el
+                  splitStrEl = el.split(' ').length > 1 ? el.split(' ') : el
 
-                  if ( Array.isArray( el ) ) {
+                  if ( Array.isArray( splitStrEl ) ) {
                       // ex: [ 'div.container', 'div#first', 'p' ]
                       parentNode = el.slice(-2, -1)[0] // 'div#first'
                       if ( this.inAppDOM(parentNode) ) {
@@ -588,7 +604,27 @@ function idk( appId ) {
                       } else {
                           throw new Error(`idk.js: Element ${ parentNode } does not exist in your appDOM.`)
                       }
-                  }
+                  } else if ( typeof el === 'string' ) {
+                      var nodeQuerys = el === 'body' || el === appId ? [this.appDOM] : this.appDOM.querySelectorAll(el)
+
+                      if ( nodeQuerys.length !== 0 ) {
+                          Array.prototype.forEach.call(nodeQuerys, node => {
+                              if ( isObject(context) ) {
+                                  node.innerHTML = context
+                              } else {
+                                  node.innerHTML = ''
+                                  this.appendToDOM(node, context)
+                              }
+                          })
+                      } else {
+                          if ( el !== undefined && context === undefined ) {
+                              this.appDOM.innerHTML = el
+                          } else {
+                              throw new Error(`idk.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
+                          }
+                      }
+                      return
+                }
             }
         }
 

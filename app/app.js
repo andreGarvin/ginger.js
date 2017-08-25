@@ -1,5 +1,39 @@
 const app = new idk()
 
+function searchForMemes( query ) {
+
+    app.fetch(`https://dankexpress.herokuapp.com/${ query ? query : ''  }`, JSONresp => {
+        const images = JSONresp.data.resp,
+              resultMessage = app.createElement('h2', `${JSONresp.data.msg}: ${JSONresp.data.length}`)
+
+        app.appendToDOM(resultMessage)
+        app.constructElement('div', {
+            childern: images.map(img => {
+                return app.createElement('img',
+                      {
+                          attributes: {
+                              alt: img.alt,
+                              src: img.src
+                          }
+                      }
+                )
+            })
+        })
+    })
+}
+searchForMemes()
+
+app.onKeyPress('#query', e => {
+    const query = app.val('#query')
+    searchForMemes( query )
+})
+
+
+
+
+/*
+
+// todo list app
 app.title('idk.js')
 var todoItems = [
     'eat',
@@ -15,16 +49,17 @@ function addNewItem( input ) {
 }
 
 function showTodoItems() {
-    let nodeArray = todoItems.map((item, i) => {
-        return app.createElement('li', item, {
-            attributes: {
-                id: i,
-                class: 'todoItem'
-            }
-        })
-    })
-    app.insertText('#itemsCount', todoItems.length)
-    app.insertToDOM('#TODOitem', nodeArray)
+  let nodeArray = todoItems.map((item, i) => {
+              return app.createElement('li', item, {
+                    attributes: {
+                        id: i,
+                        class: 'todoItem'
+                    }
+              })
+      })
+
+      app.insertText('#itemsCount', todoItems.length)
+      app.insertToDOM('#TODOitem', nodeArray)
 }
 showTodoItems()
 
@@ -36,21 +71,18 @@ app.onKeyPressDown('input', e => {
 })
 
 
-
-/*
-
-  // More things you can do with idk
+// More things you can do with idk.js
 
 app.bindInputToElement('input', '#search')
 
 var nodeArray = ['h1', 'h2', 'h3'].map((nodeName, i) => {
     return app.createElement(nodeName, {
-        attributes: {
-            id: i,
-            class: 'node'
-        },
-        text: `This is a <${ nodeName }> tag.`
-    })
+              attributes: {
+                id: i,
+                class: 'node'
+              },
+              text: `This is a <${ nodeName }> tag.`
+        })
 })
 app.appendToDOM(nodeArray)
 
