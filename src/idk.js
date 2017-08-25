@@ -71,7 +71,7 @@ function returnEventObj( eventObj ) {
       return newEventObj
 }
 
-
+// these are two small fucnions that help aroudn the code base to reduce repetive code
 const isEmptyObj = ( obj ) => Object.keys( obj ).length === 0 ? true : false;
 const isObject = ( dataType ) => typeof dataType === 'object' && !Array.isArray(dataType) ? true : false
 
@@ -93,20 +93,29 @@ function idk( appId ) {
     if ( this.appDOM !== null ) {
 
         /**
-         * Evaluets the node Obj that was passed and attaching that props and data to the node
-         * @param {string} propName
-         * @param {nodeObject} node
-         * @param {nodeObj} object
+         * This fucntion Evalutes the node Obj that was passed and attaching
+         * that props and data to the node
+         * @param {string} propName The key on the {nodeObj} and name of the attribute
+         * @param {nodeObject} node This is the node that is being passed to add
+         * added attributes to
+         * @param {(object|string)} propValue This is the value of the value of the propName
+         * of the property from the {nodeObj} is could be ethier a object or string
+         * @function
          */
-        function evalNodeObj( node, propName, propValue) {
+        function evalNodeObj( node, propName, propValue ) {
+              const appDOM = argument
               switch ( propName ) {
+                  // appends text to the node
                   case 'text':
                         // add the node context as a node text
                         nodeContext = this.document.createTextNode(propValue);
                         // apppend that context to the 'newNode'
                         node.appendChild(nodeContext);
                       break
+                  // sets the attributes to the node
                   case 'attributes':
+                      // becasue this is a fucntion this has not context and could not bind to the class idk
+                      // make a new but same intsance of the idk and strget the lement in its DOM
                       return appId ? new idk(appId).setAttributes(node, propValue) : new idk().setAttributes(node, propValue)
                   case 'style':
                           var styleStr = '';
@@ -302,15 +311,19 @@ function idk( appId ) {
                   } else {
                       var nodeQuerys = el === 'body' || el === appId ? [this.appDOM] : this.appDOM.querySelectorAll(el)
 
-                      if ( typeof el === 'string' && context !== undefined ) {
-                          if ( nodeQuerys.length !== 0 ) {
-                              Array.prototype.forEach.call(nodeQuerys, node => {
-                                  if ( isObject(context) ) {
-                                      node.appendChild(context)
-                                  } else {
-                                      node.appendChild(this.document.createTextNode(context))
-                                  }
-                              })
+                      if ( nodeQuerys.length !== 0 ) {
+                          Array.prototype.forEach.call(nodeQuerys, node => {
+                                if ( isObject(context) ) {
+                                  node.appendChild(context)
+                                } else {
+                                  node.appendChild(this.document.createTextNode(context))
+                                }
+                          })
+                      } else {
+                          if ( el !== undefined && context === undefined ) {
+                              this.appDOM.appendChild(
+                                  this.document.createTextNode(el)
+                              )
                           } else {
                               throw new Error(`idk.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
                           }
@@ -365,14 +378,10 @@ function idk( appId ) {
             })
         }
 
-        /**
-         *
-         */
         this.switch = function( trgEl, func1, func2 ) {
             var clicked = false;
 
             this.click(trgEl, e => {
-                  console.log( clicked )
                   if ( clicked === true ) {
                       clicked = false;
                       return func2( e )
@@ -384,7 +393,7 @@ function idk( appId ) {
 
         this.constructElement = function(elementName, nodeObj) {
               if ( typeof elementName === 'string' ) {
-                  const constructedNode = this.createElement(elementName, { attributes: nodeObj.attributes } || undefined )
+                  const constructedNode = this.createElement(elementName, nodeObj === undefined ? undefined : { attributes: nodeObj.attributes } )
                   for (let prop in nodeObj) {
                         if  ( prop !== 'attributes' ) {
                             switch ( prop ) {
@@ -414,7 +423,12 @@ function idk( appId ) {
                             }
                         }
                   }
-                  this.appendToDOM(constructedNode)
+
+                  if ( this.appDOM.querySelectorAll(elementName).length !== 0 ) {
+                      compareAppDOM(this.appDOM, constructedNode)
+                  } else {
+                      this.appendToDOM(constructedNode)
+                  }
               } else {
                  throw new Error(`ikd.js: Element could not bre construcuted check you nodeObject for any errors.`)
               }
@@ -558,8 +572,8 @@ function idk( appId ) {
                 })
             } else if ( isObject(el) ) {
                   if ( context === undefined ) {
-                      this.appDOM.innerHTL = ''
-                      this.appDOM.appendChild(context)
+                      this.appDOM.innerHTML = ''
+                      this.appDOM.appendChild(el)
                   } else {
                       if ( this.inAppDOM(el) ) {
                           if ( isObject(context) ) {
@@ -574,9 +588,9 @@ function idk( appId ) {
                   }
             } else {
                   let parentNode, nodeName;
-                  el = el.split(' ').length > 1 ? el.split(' ') : el
+                  splitStrEl = el.split(' ').length > 1 ? el.split(' ') : el
 
-                  if ( Array.isArray( el ) ) {
+                  if ( Array.isArray( splitStrEl ) ) {
                       // ex: [ 'div.container', 'div#first', 'p' ]
                       parentNode = el.slice(-2, -1)[0] // 'div#first'
                       if ( this.inAppDOM(parentNode) ) {
@@ -588,7 +602,27 @@ function idk( appId ) {
                       } else {
                           throw new Error(`idk.js: Element ${ parentNode } does not exist in your appDOM.`)
                       }
-                  }
+                  } else if ( typeof el === 'string' ) {
+                      var nodeQuerys = el === 'body' || el === appId ? [this.appDOM] : this.appDOM.querySelectorAll(el)
+
+                      if ( nodeQuerys.length !== 0 ) {
+                          Array.prototype.forEach.call(nodeQuerys, node => {
+                              if ( isObject(context) ) {
+                                  node.innerHTML = context
+                              } else {
+                                  node.innerHTML = ''
+                                  this.appendToDOM(node, context)
+                              }
+                          })
+                      } else {
+                          if ( el !== undefined && context === undefined ) {
+                              this.appDOM.innerHTML = el
+                          } else {
+                              throw new Error(`idk.js: ${ el }${ el.class ? el.class : el.id ? el.id : ''  } is a undefined element on your your appDOM.`)
+                          }
+                      }
+                      return
+                }
             }
         }
 
