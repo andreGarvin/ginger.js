@@ -423,9 +423,9 @@ function idk( appId ) {
          */
         this.onKeyPressDown = function( elementName, handler ) {
             let elements = this.appDOM.querySelectorAll(elementName)
-            Array.prototype.forEach.call(elements, node =>
+            Array.prototype.forEach.call(elements, node => {
                   // check if the node event is a keydown
-                  node.addEventListener('keydown', e =>
+                  node.addEventListener('keydown', e => {
                       // get the event Object that was passed from the callback
                       e = returnEventObj(e)
                       // return new event object
