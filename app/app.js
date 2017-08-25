@@ -1,75 +1,44 @@
 const app = new idk()
 
-function searchForMemes( query ) {
-
-    app.fetch(`https://dankexpress.herokuapp.com/${ query ? query : ''  }`, JSONresp => {
-        const images = JSONresp.data.resp,
-              resultMessage = app.createElement('h2', `${JSONresp.data.msg}: ${JSONresp.data.length}`)
-
-        app.appendToDOM(resultMessage)
-        app.constructElement('div', {
-            childern: images.map(img => {
-                return app.createElement('img',
-                      {
-                          attributes: {
-                              alt: img.alt,
-                              src: img.src
-                          }
-                      }
-                )
-            })
-        })
-    })
-}
-searchForMemes()
-
-app.onKeyPress('#query', e => {
-    const query = app.val('#query')
-    searchForMemes( query )
-})
-
-
-
-
-/*
-
 // todo list app
 app.title('idk.js')
 var todoItems = [
-    'eat',
-    'sleep',
-    'code'
+  'eat',
+  'sleep',
+  'code'
 ]
 
 function addNewItem( input ) {
-    if ( input.length > 0 ) {
-        todoItems.push( input )
-        showTodoItems()
-    }
+  if ( input.length > 0 ) {
+    todoItems.push( input )
+    showTodoItems()
+  }
 }
 
 function showTodoItems() {
   let nodeArray = todoItems.map((item, i) => {
-              return app.createElement('li', item, {
-                    attributes: {
-                        id: i,
-                        class: 'todoItem'
-                    }
-              })
-      })
+    return app.createElement('li', item, {
+      attributes: {
+        id: i,
+        class: 'todoItem'
+      }
+    })
+  })
 
-      app.insertText('#itemsCount', todoItems.length)
-      app.insertToDOM('#TODOitem', nodeArray)
+  app.insertText('#itemsCount', todoItems.length)
+  app.insertToDOM('#TODOitem', nodeArray)
 }
 showTodoItems()
 
 app.onKeyPressDown('input', e => {
-    if ( e.key === 'Enter' ) {
-        addNewItem( app.val('input') )
-        app.val('input', '')
-    }
+  if ( e.key === 'Enter' ) {
+    addNewItem( app.val('input') )
+    app.val('input', '')
+  }
 })
 
+
+/*
 
 // More things you can do with idk.js
 
