@@ -38,6 +38,11 @@ app.onKeyPressDown('input', e => {
 })
 
 
+app.router({
+    '/': app.createElement('h1', 'Hello, World'),
+    '/about': app.createElement('p', 'This is testing the router for idk.js')
+})
+
 /*
 
 // More things you can do with idk.js
