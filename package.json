@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  	"serve:dev": "serve -d app --port :5000 --mode dev",
+	"serve": "serve -d app"
   },
   "repository": {
     "type": "git",
@@ -15,9 +16,5 @@
   "bugs": {
     "url": "https://github.com/andreGarvin/idk.js/issues"
   },
-  "homepage": "https://github.com/andreGarvin/idk.js#readme",
-  "devDependencies": {
-    "webpack": "^3.5.5",
-    "webpack-dev-server": "^2.7.1"
-  }
+  "homepage": "https://github.com/andreGarvin/idk.js#readme"
 }
