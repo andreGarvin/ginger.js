@@ -86,6 +86,8 @@ function idk( appId ) {
     // this the actual DOM of the web page
     this.document = document
 
+    this.location = window.location
+
     // This is the elements DOM or 'nodeObj'
         // - if the appId was not given then check if for a HTML element/node call 'app'
     this.appDOM = appId === undefined ? this.document.querySelector('app') : this.document.getElementById(appId.slice(1))
@@ -454,6 +456,18 @@ function idk( appId ) {
             })
         }
 
+        this.router = funcntion(routerObj) {
+            this.insertToDOM(this.appDOM, '')
+            const path = this.location.pathname
+
+            for (var r in routerObj) {
+                if (r === path) {
+                    return this.insertToDOM(this.appDOM, routerObj[r])
+                }
+            }
+        }
+
+
         /**
          * This method contsructs a a custom element or a HTML structure,
          * this is almost liek beuilding a component but not really, it is a
@@ -553,7 +567,7 @@ function idk( appId ) {
          */
         this.val = function( el, context ) {
             let elements = isObject(el) ? el : this.appDOM.querySelectorAll(el)
-            if ( context !== undefined || context !== null ) {
+            if ( context !== undefined && context !== null ) {
                 // sets the value of all the input feild to the gven context
                 Array.prototype.forEach.call(elements, node => {
                     node.value = context.toString()

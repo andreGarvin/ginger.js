@@ -1,47 +1,46 @@
 const app = new idk()
 
-// todo list app
-app.title('idk.js')
-var todoItems = [
-  'eat',
-  'sleep',
-  'code'
-]
-
-function addNewItem( input ) {
-  if ( input.length > 0 ) {
-    todoItems.push( input )
-    showTodoItems()
-  }
-}
-
-function showTodoItems() {
-  let nodeArray = todoItems.map((item, i) => {
-    return app.createElement('li', item, {
-      attributes: {
-        id: i,
-        class: 'todoItem'
-      }
-    })
-  })
-
-  app.insertText('#itemsCount', todoItems.length)
-  app.insertToDOM('#TODOitem', nodeArray)
-}
-showTodoItems()
-
-app.onKeyPressDown('input', e => {
-  if ( e.key === 'Enter' ) {
-    addNewItem( app.val('input') )
-    app.val('input', '')
-  }
-})
-
 
 app.router({
-    '/': app.createElement('h1', 'Hello, World'),
+    '/': app.createElement('h1', `query: ${ app.appRoutes.params.q }`),
     '/about': app.createElement('p', 'This is testing the router for idk.js')
 })
+// todo list app
+// app.title('idk.js')
+// var todoItems = [
+//   'eat',
+//   'sleep',
+//   'code'
+// ]
+//
+// function addNewItem( input ) {
+//   if ( input.length > 0 ) {
+//     todoItems.push( input )
+//     showTodoItems()
+//   }
+// }
+//
+// function showTodoItems() {
+//   let nodeArray = todoItems.map((item, i) => {
+//     return app.createElement('li', item, {
+//       attributes: {
+//         id: i,
+//         class: 'todoItem'
+//       }
+//     })
+//   })
+//
+//   app.insertText('#itemsCount', todoItems.length)
+//   app.insertToDOM('#TODOitem', nodeArray)
+// }
+// showTodoItems()
+//
+// app.onKeyPressDown('input', e => {
+//   if ( e.key === 'Enter' ) {
+//     addNewItem( app.val('input') )
+//     app.val('input', '')
+//   }
+// })
 
 /*
 
