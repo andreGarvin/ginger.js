@@ -2,18 +2,17 @@ const app = new idk()
 
 
 app.router('/', routerObj => {
-    // console.log( routerObj )
     return app.createElement('h1', `query: ${ routerObj.param.q || '' }`)
-})
-
-app.router('/:name', routerObj => {
-    return app.createElement('h2', `Hello, ${ routerObj.pathVariable.name }`)
 })
 
 app.router('/about', routerObj => {
     var text = app.createElement('p', 'This is testing the router for idk.js')
     app.appendToDOM(text)
 })
+
+// app.router('/:name', routerObj => {
+//     app.appendToDOM(app.createElement('h2', `Hello, ${ routerObj.pathVariable.name }`))
+// })
 
 // todo list app
 // app.title('idk.js')
