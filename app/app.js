@@ -1,5 +1,20 @@
 const app = new idk()
 
+app.router('/', routerObj => {
+    return app.createElement('h1', `query: ${ routerObj.pathParam.q || '' }`)
+})
+
+app.router('/about', routerObj => {
+    var text = app.createElement('p', 'This is testing the router for idk.js')
+    app.appendToDOM(text)
+})
+
+app.router('/$name', routerObj => {
+    app.appendToDOM(app.createElement('h2', `Hello, ${ routerObj.pathVariable.name }`))
+})
+
+
+/*
 // todo list app
 app.title('idk.js')
 var todoItems = [
@@ -36,10 +51,9 @@ app.onKeyPressDown('input', e => {
     app.val('input', '')
   }
 })
-
+*/
 
 /*
-
 // More things you can do with idk.js
 
 app.bindInputToElement('input', '#search')

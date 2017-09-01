@@ -86,6 +86,16 @@ function idk( appId ) {
     // this the actual DOM of the web page
     this.document = document
 
+    this.browser = {
+        activeRoute: false,
+        pathParam: null,
+        pathVariable: null,
+        host: window.location.host,
+        port: window.location.port,
+        path: window.location.pathname,
+        proto: window.location.protocal,
+    }
+
     // This is the elements DOM or 'nodeObj'
         // - if the appId was not given then check if for a HTML element/node call 'app'
     this.appDOM = appId === undefined ? this.document.querySelector('app') : this.document.getElementById(appId.slice(1))
@@ -454,6 +464,55 @@ function idk( appId ) {
             })
         }
 
+        this.router = function(route, render) {
+            function getPathVaiables() {
+                if (
+                  (this.browser.path.slice(1).split('/').length === route.slice(1).split('/').length)
+                  &&
+                  !this.browser.path.slice(1).split('/').includes('')
+                  ) {
+                    this.browser.pathVariable = {}
+                    const splitPath = this.browser.path.slice(1).split('/')
+                    const splitRoute = route.slice(2).split('/')
+
+                    for (let i in splitPath) {
+                        this.browser.pathVariable[ splitRoute[i] ] = splitPath[i]
+                    }
+                }
+            }
+            function getParams() {
+                this.browser.pathParam = {}
+                let params = window.location.search
+                const splitStringParams = params.slice(1).split('&')
+
+                for (let p in splitStringParams) {
+                    param = splitStringParams[p].split('=')
+                    this.browser.pathParam[ param[0] ] = param[1] || ''
+                }
+            }
+            getParams.bind(this)()
+
+
+            if (route.split('$').length > 1) {
+                getPathVaiables.bind(this)()
+
+                if (!this.browser.activeRoute) {
+                    if (render.toString().split(' ').includes('return')) {
+                      return this.insertToDOM(this.appDOM, render(this.browser))
+                    }
+                    return render(this.browser)
+                }
+            } else if (route === this.browser.path) {
+                this.browser.activeRoute = true
+
+                if (render.toString().split(' ').includes('return')) {
+                    return this.insertToDOM(this.appDOM, render(this.browser))
+                }
+                return render(this.browser)
+            }
+        }
+
+
         /**
          * This method contsructs a a custom element or a HTML structure,
          * this is almost liek beuilding a component but not really, it is a
@@ -553,7 +612,7 @@ function idk( appId ) {
          */
         this.val = function( el, context ) {
             let elements = isObject(el) ? el : this.appDOM.querySelectorAll(el)
-            if ( context !== undefined || context !== null ) {
+            if ( context !== undefined && context !== null ) {
                 // sets the value of all the input feild to the gven context
                 Array.prototype.forEach.call(elements, node => {
                     node.value = context.toString()
