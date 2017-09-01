@@ -456,15 +456,30 @@ function idk( appId ) {
             })
         }
 
-        this.router = funcntion(routerObj) {
-            this.insertToDOM(this.appDOM, '')
-            const path = this.location.pathname
+        this.router = function(route, render) {
+            const routerObj = {
+                path: window.location.pathname,
+                host: window.location.host,
+                port: window.location.port,
+                proto: window.location.protocal,
+                pathVariable: {},
+                params: {},
+                getPathVaiables: function() {},
+                getParams: function() {
+                    let params = window.location.search
 
-            for (var r in routerObj) {
-                if (r === path) {
-                    return this.insertToDOM(this.appDOM, routerObj[r])
+                    console.log( params )
                 }
             }
+            routerObj.getParams()
+
+            // if (route === routerObj.path) {
+            //     if (render.toString().split(' ').includes('return')) {
+            //       this.insertToDOM(this.appDOM, render(routerObj))
+            //     }
+            //     return render(routerObj)
+            // }
+            // else if (route.split(':'))
         }
 
 

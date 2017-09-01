@@ -2,7 +2,7 @@ const app = new idk()
 
 
 app.router('/', routerObj => {
-    return app.createElement('h1', `query: ${ routerObj.param.q || '' }`)
+    return app.createElement('h1', `query: ${ routerObj.pathParam.q || '' }`)
 })
 
 app.router('/about', routerObj => {
@@ -10,9 +10,9 @@ app.router('/about', routerObj => {
     app.appendToDOM(text)
 })
 
-// app.router('/:name', routerObj => {
-//     app.appendToDOM(app.createElement('h2', `Hello, ${ routerObj.pathVariable.name }`))
-// })
+app.router('/$name', routerObj => {
+    app.appendToDOM(app.createElement('h2', `Hello, ${ routerObj.pathVariable.name }`))
+})
 
 // todo list app
 // app.title('idk.js')
