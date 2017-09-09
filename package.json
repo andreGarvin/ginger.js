@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  	"serve:dev": "serve -d app --port :5000 --mode dev --i /src/idk.js",
-	"serve": "serve -d app"
+  	"serve:dev": "serve -d app --port :5000 --mode dev -i ./src/idk.js",
+	  "serve": "serve -d app"
   },
   "repository": {
     "type": "git",

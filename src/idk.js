@@ -112,7 +112,7 @@ function idk( appId ) {
          * of the property from the {nodeObj} is could be ethier a object or string
          * @function
          */
-        function evalNodeObj( node, propName, propValue ) {
+        this.evalNodeObj = function( node, propName, propValue ) {
               // gets the this.appDOM passed to the fucntion because 'this'
               // is not bind the class idk
               let appDOM = Array.from( arguments ).slice(-1)[0]
@@ -126,15 +126,15 @@ function idk( appId ) {
                       break
                   // sets the attributes to the node
                   case 'attributes':
-                      return appDOM.setAttributes(node, propValue)
+                      return this.setAttributes(node, propValue)
                   // sets the styles of the node and gets the propValue of the
                   // style object and concatinates the key with its value to the styleStr
                   case 'style':
-                          var styleStr = '';
-                          for (var s in propValue) {
-                              styleStr += `${s}: ${propValue[s]};`
-                          }
-                        return appDOM.setAttributes(node, { style: styleStr })
+                        var styleStr = '';
+                        for (var s in propValue) {
+                            styleStr += `${s}: ${propValue[s]};`
+                        }
+                      return this.setAttributes(node, { style: styleStr })
               }
         }
 
@@ -225,7 +225,7 @@ function idk( appId ) {
                         nodeObj = context
                         for (let prop in nodeObj) {
                             if ( nodeObj[prop] !== undefined ) {
-                                evalNodeObj(newNode, prop, nodeObj[prop])
+                                this.evalNodeObj(newNode, prop, nodeObj[prop])
                             }
                         }
                     }
@@ -258,7 +258,7 @@ function idk( appId ) {
                     for (var i in attributeObj) {
                         // pass the the style object to the eval evalNodeObj
                         if ( i === 'style' && isObject( attributeObj[i] ) ) {
-                            evalNodeObj(node, i, attributeObj[i])
+                            this.evalNodeObj(node, i, attributeObj[i])
                         } else {
                             node.setAttribute(i, attributeObj[i])
                         }
@@ -464,51 +464,81 @@ function idk( appId ) {
             })
         }
 
-        this.router = function(route, render) {
+        /**
+         * This allows your web application into single page applications
+         * @param {string} route The route path that is assigned to the page or component view
+         * @param {function} render This is the render fucntions that render that to the HTML page/ {appDOM}
+         * @return {(render|this.insertToDOM)}
+         */
+        this.router = function(route, renderFunc) {
+            /*
+              This function retruns back the path varibles from the route being requested
+                ex:
+                  # route: '/foo/$name'
+                  # requested-route: '/foo/andre'
+                  pathVariable: {
+                      name: 'andre'
+                  }
+            */
             function getPathVaiables() {
+                /*
+                  checks if the the requested route is the same length as the create route
+                  then it checls if the route does not have a spaces or is the a index route
+                    ex:
+                      # route '/'; route.split('/') => [ '/', '' ]
+                      # requested-route: '/andre'; requested-route.split('/') =>  [ '/' , 'andre']
+
+                    the includes checks if there are no spaces in the requested path
+                */
                 if (
                   (this.browser.path.slice(1).split('/').length === route.slice(1).split('/').length)
                   &&
                   !this.browser.path.slice(1).split('/').includes('')
                   ) {
                     this.browser.pathVariable = {}
-                    const splitPath = this.browser.path.slice(1).split('/')
-                    const splitRoute = route.slice(2).split('/')
+                    const splitRequestedRoute = this.browser.path.slice(1).split('/')
+                    const splitConstructedRoute = route.slice(2).split('/')
 
-                    for (let i in splitPath) {
-                        this.browser.pathVariable[ splitRoute[i] ] = splitPath[i]
+                    // looping over the constructed route and the requested-route to
+                    // insert the right varible to the right string in request-route
+                    for (let i in splitRequestedRoute) {
+                        this.browser.pathVariable[ splitConstructedRoute[i] ] = splitRequestedRoute[i]
                     }
                 }
             }
+            // gets the params from the 'search' prop string
             function getParams() {
                 this.browser.pathParam = {}
-                let params = window.location.search
+
+                const params = window.location.search
                 const splitStringParams = params.slice(1).split('&')
 
                 for (let p in splitStringParams) {
                     param = splitStringParams[p].split('=')
+
                     this.browser.pathParam[ param[0] ] = param[1] || ''
                 }
             }
-            getParams.bind(this)()
+            getParams.call(this)
 
-
+            // checks to see if the constructed route has  varible identifier
             if (route.split('$').length > 1) {
-                getPathVaiables.bind(this)()
+                getPathVaiables.call(this)
 
+                // checks the is a active route that has the same length but does not have a variable path identifier
                 if (!this.browser.activeRoute) {
-                    if (render.toString().split(' ').includes('return')) {
-                      return this.insertToDOM(this.appDOM, render(this.browser))
+                    if (renderFunc.toString().split(' ').includes('return')) {
+                        return this.insertToDOM(this.appDOM, renderFunc(this.browser))
                     }
-                    return render(this.browser)
+                    return renderFunc(this.browser)
                 }
             } else if (route === this.browser.path) {
                 this.browser.activeRoute = true
 
-                if (render.toString().split(' ').includes('return')) {
-                    return this.insertToDOM(this.appDOM, render(this.browser))
+                if (renderFunc.toString().split(' ').includes('return')) {
+                    return this.insertToDOM(this.appDOM, renderFunc(this.browser))
                 }
-                return render(this.browser)
+                return renderFunc(this.browser)
             }
         }
 
@@ -553,7 +583,12 @@ function idk( appId ) {
                         }
                   }
 
-                  this.appendToDOM(constructedNode)
+                  const dismount = typeof Array.from( arguments ).slice(-1)[0] &&  Array.from( arguments ).slice(-1)[0] === 'dismount';
+                  if ( dismount ) {
+                      return constructedNode
+                  } else {
+                      this.appendToDOM(constructedNode)
+                  }
               } else {
                  throw new Error(`ikd.js: Element could not bre construcuted check you nodeObject for any errors.`)
               }

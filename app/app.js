@@ -1,22 +1,8 @@
-const app = new idk()
+const app = new idk('#app')
 
-app.router('/', routerObj => {
-    return app.createElement('h1', `query: ${ routerObj.pathParam.q || '' }`)
-})
-
-app.router('/about', routerObj => {
-    var text = app.createElement('p', 'This is testing the router for idk.js')
-    app.appendToDOM(text)
-})
-
-app.router('/$name', routerObj => {
-    app.appendToDOM(app.createElement('h2', `Hello, ${ routerObj.pathVariable.name }`))
-})
-
-
-/*
 // todo list app
 app.title('idk.js')
+
 var todoItems = [
   'eat',
   'sleep',
@@ -50,6 +36,23 @@ app.onKeyPressDown('input', e => {
     addNewItem( app.val('input') )
     app.val('input', '')
   }
+})
+
+/*
+ to use the router run `npm run serve:dev`
+app.router('/', browser => app.createElement('h1', `query: ${ browser.pathParam.q || '' }`))
+
+app.router('/about', browser => {
+    var text = app.createElement('p', 'This is testing the router for idk.js')
+    app.appendToDOM(text)
+})
+
+app.router('/$name', browser => {
+    const userComponent = app.constructElement('user', {
+        h1: `Hello, ${ browser.pathVariable.name }`,
+        p: `You are ${ browser.pathParam.age } years old.`,
+    }, 'dismount')
+    return userComponent
 })
 */
 

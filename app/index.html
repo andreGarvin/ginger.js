@@ -3,23 +3,23 @@
   <head>
     <meta charset="utf-8">
     <title></title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous" />
   </head>
   <body>
 
       <!--
         You can also make a <div> with attribute id='<whatever id name>'
           ex: <div id='app'></div>
+        Or create element called 'app' like this
+          ex: <app></app>
       -->
-      <app>
-        <!-- <h1>Here are my TODO items:</h1>
-        <p>You have <span id='itemsCount'></span> TODO</p>
-        <ul id='TODOitem'></ul>
-        <div>
-            <p id='search'></p>
-            <input type="text" placeholder="enter todo item" />
-            <button id='btn' type="button">add item</button>
-        </div> -->
-      </app>
+      <div id='app'>
+          <h1>Here are my TODO items:</h1>
+          <p>You have <span id='itemsCount'></span> TODO</p>
+          <ul id='TODOitem'></ul>
+          <p class='lead' id='search'></p>
+          <input type="text" class='form-control' placeholder="enter todo item" />
+      </div>
 
       <script src='/src/idk.js'></script>
       <script type="text/javascript" src='/app.js'></script>
