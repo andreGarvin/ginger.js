@@ -1,5 +1,6 @@
 const app = new idk('#app')
 
+/*
 // todo list app
 app.title('idk.js')
 
@@ -37,9 +38,9 @@ app.onKeyPressDown('input', e => {
     app.val('input', '')
   }
 })
+*/
 
-/*
- to use the router run `npm run serve:dev`
+// to use the router run `npm run serve:dev`
 app.router('/', browser => app.createElement('h1', `query: ${ browser.pathParam.q || '' }`))
 
 app.router('/about', browser => {
@@ -54,7 +55,6 @@ app.router('/$name', browser => {
     }, 'dismount')
     return userComponent
 })
-*/
 
 /*
 // More things you can do with idk.js

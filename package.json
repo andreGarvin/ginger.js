@@ -4,14 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  	"serve:dev": "serve -d app --port :5000 --mode dev -i ./src/idk.js",
+  	"serve:dev": "serve -d app --port=:5000 --mode=dev --i ./src/idk.js",
 	  "serve": "serve -d app"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/andreGarvin/idk.js.git"
   },
-  "author": "= <=>",
+  "author": "Andre Garvin <=>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/andreGarvin/idk.js/issues"
