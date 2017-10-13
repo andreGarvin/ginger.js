@@ -84,7 +84,7 @@ const isObject = ( dataType ) => typeof dataType === 'object' && !Array.isArray(
  */
 function idk( appId ) {
     // this the actual DOM of the web page
-    this.document = document
+    this.document = document;
 
     this.browser = {
         activeRoute: false,
@@ -278,8 +278,8 @@ function idk( appId ) {
         this.getAttributes = function( el ) {
             // if the el was a query string then pass that into querySelector
             // if not then it must be a nodeObject and just assign that to el
-            el = typeof el === 'string' ? this.appDOM.querySelector(el) : el,
-                attributes = {};
+            el = typeof el === 'string' ? this.appDOM.querySelector(el) : el
+            const attributes = {};
             Array.prototype.forEach.call(el.attributes, prop => {
                 attributes[prop.name] = prop.value;
             })
@@ -525,7 +525,8 @@ function idk( appId ) {
             if (route.split('$').length > 1) {
                 getPathVaiables.call(this)
 
-                // checks the is a active route that has the same length but does not have a variable path identifier
+                // checks the is a active route that has the same length
+                // but does not have a variable path identifier
                 if (!this.browser.activeRoute) {
                     if (renderFunc.toString().split(' ').includes('return')) {
                         return this.insertToDOM(this.appDOM, renderFunc(this.browser))
@@ -617,7 +618,8 @@ function idk( appId ) {
          * This method displays or hides the HTML elements or nodes on the appDOM
          * deppening on the 'action'
          * @param {(string|nodeObject)} el This is a query selector of HTML element or a node Object
-         * @param {string} action
+         * @param {string} action This is a string that tells it ti hide or show. if action is undefined then
+         * it results to showing
          */
         this.display = function( el, action ) {
             let elements = isObject(el) && !Array.isArray(el) ? el : this.appDOM.querySelectorAll(el)
@@ -670,6 +672,17 @@ function idk( appId ) {
         this.fetch = function( url, callback ) {
             const respObj = {};
 
+            /*
+                TODO:
+                Change this fetch promise to a funvtion using async and await
+                    ex:
+                    async function _fetch(url) {
+                        const resp = await fetch(url),
+                        respObj = {};
+                        ...stuff
+                        return callback(respObj)
+                    }
+            */
             fetch(url)
                 .then(resp => {
                     respObj.url = resp.url
