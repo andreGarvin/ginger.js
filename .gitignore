@@ -1,3 +1,8 @@
+node_modules
+.circleci
+__tests__
+
+serve.exe
 serve.go
 notes
 test-app

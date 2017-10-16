@@ -84,7 +84,7 @@ const isObject = ( dataType ) => typeof dataType === 'object' && !Array.isArray(
  */
 function idk( appId ) {
     // this the actual DOM of the web page
-    this.document = document;
+    this.document = window.document;
 
     this.browser = {
         activeRoute: false,
@@ -153,8 +153,12 @@ function idk( appId ) {
          * element or a {nodeObject}
          * @returns {boolean}
          */
-        this.inAppDOM = ( el ) => typeof el === 'string' ? this.appDOM.querySelectorAll(el).length > 0 ? true : false : el.parentNode !== null ? true : false
-
+        this.inAppDOM = ( el ) => {
+            if (typeof el === 'string') {
+                return this.appDOM.querySelectorAll(el).length > 0
+            }
+            return el.parentNode !== null ? true : false
+        }
         /**
          * This method returns back the first element found on the {appDOM} or
          * the specfic element query slected on the {appDOM}
@@ -818,3 +822,11 @@ function idk( appId ) {
         return new Error(`idk.js: id '${ appId }' does not exist.`)
     }
 }
+
+(function() {
+    if (typeof module === 'object' && typeof module.exports === 'object') {
+        module.exports = idk
+    } else {
+        window.idk = idk
+    }
+})()

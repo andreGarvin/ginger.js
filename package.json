@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  	"serve:dev": "serve -d app --port=:5000 --mode=dev --i ./src/idk.js",
-	  "serve": "serve -d app"
+    "serve:dev": "serve -d app --port=:5000 --mode=dev --i ./src/idk.js",
+    "serve": "serve -d app",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -16,5 +17,9 @@
   "bugs": {
     "url": "https://github.com/andreGarvin/idk.js/issues"
   },
-  "homepage": "https://github.com/andreGarvin/idk.js#readme"
+  "homepage": "https://github.com/andreGarvin/idk.js#readme",
+  "devDependencies": {
+    "jest": "^21.2.1",
+    "jsdom": "^11.3.0"
+  }
 }
